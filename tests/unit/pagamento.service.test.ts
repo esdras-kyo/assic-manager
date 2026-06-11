@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { enviarConfirmacaoInscricao } from "@/services/email.service";
 import { AssinaturaInvalidaError } from "@/services/payment/gateways/fake.gateway";
 import {
   confirmarPagamento,
@@ -27,6 +28,10 @@ const gatewayMock = {
 
 vi.mock("@/services/payment", () => ({
   getPaymentGateway: () => gatewayMock,
+}));
+
+vi.mock("@/services/email.service", () => ({
+  enviarConfirmacaoInscricao: vi.fn(),
 }));
 
 const mocked = vi.mocked(prisma, true);
@@ -179,6 +184,63 @@ describe("confirmarPagamento (idempotente — §4.5.1)", () => {
     await expect(confirmarPagamento("nada")).rejects.toBeInstanceOf(
       PagamentoNaoEncontradoError,
     );
+  });
+
+  it("confirmação envia email exatamente uma vez", async () => {
+    mocked.pagamento.findUnique.mockResolvedValue({
+      ...pagamentoDb,
+      inscricao: inscricaoPendente,
+    } as never);
+    mocked.pagamento.update.mockResolvedValue({
+      ...pagamentoDb,
+      status: "PAID",
+    });
+    mocked.inscricao.update.mockResolvedValue({
+      ...inscricaoPendente,
+      status: "CONFIRMADA",
+    } as never);
+
+    await confirmarPagamento("fake_abc");
+
+    expect(enviarConfirmacaoInscricao).toHaveBeenCalledOnce();
+    expect(enviarConfirmacaoInscricao).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "maria@example.com",
+        eventoNome: "Encontro de Junho",
+      }),
+    );
+  });
+
+  it("repetição (já PAID) não reenvia email", async () => {
+    mocked.pagamento.findUnique.mockResolvedValue({
+      ...pagamentoDb,
+      status: "PAID",
+      inscricao: { ...inscricaoPendente, status: "CONFIRMADA" },
+    } as never);
+
+    await confirmarPagamento("fake_abc");
+    expect(enviarConfirmacaoInscricao).not.toHaveBeenCalled();
+  });
+
+  it("falha no envio de email não derruba a confirmação", async () => {
+    mocked.pagamento.findUnique.mockResolvedValue({
+      ...pagamentoDb,
+      inscricao: inscricaoPendente,
+    } as never);
+    mocked.pagamento.update.mockResolvedValue({
+      ...pagamentoDb,
+      status: "PAID",
+    });
+    mocked.inscricao.update.mockResolvedValue({
+      ...inscricaoPendente,
+      status: "CONFIRMADA",
+    } as never);
+    vi.mocked(enviarConfirmacaoInscricao).mockRejectedValueOnce(
+      new Error("smtp caiu"),
+    );
+
+    const r = await confirmarPagamento("fake_abc");
+    expect(r.inscricaoConfirmada).toBe(true);
   });
 
   it("inscrição EXPIRADA não volta: pagamento PAID, inscrição intocada", async () => {

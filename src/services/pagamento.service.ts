@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { enviarConfirmacaoInscricao } from "@/services/email.service";
 import { podeTransicionar } from "@/services/inscricao-maquina";
 import { InscricaoNaoEncontradaError } from "@/services/inscricao.service";
 import { getPaymentGateway } from "@/services/payment";
@@ -102,7 +103,7 @@ export async function confirmarPagamento(gatewayPaymentId: string): Promise<{
 }> {
   const pagamento = await prisma.pagamento.findUnique({
     where: { gatewayPaymentId },
-    include: { inscricao: true },
+    include: { inscricao: { include: { evento: true } } },
   });
   if (!pagamento) throw new PagamentoNaoEncontradoError(gatewayPaymentId);
 
@@ -126,6 +127,19 @@ export async function confirmarPagamento(gatewayPaymentId: string): Promise<{
     where: { id: pagamento.inscricaoId },
     data: { status: "CONFIRMADA" },
   });
+
+  // Falha de email não desfaz a confirmação — inscrição já está paga.
+  try {
+    await enviarConfirmacaoInscricao({
+      nome: pagamento.inscricao.nome,
+      email: pagamento.inscricao.email,
+      eventoNome: pagamento.inscricao.evento.nome,
+      eventoLocal: pagamento.inscricao.evento.local,
+      eventoDataInicio: pagamento.inscricao.evento.dataInicio,
+    });
+  } catch (erro) {
+    console.error("Falha ao enviar email de confirmação:", erro);
+  }
 
   return { jaConfirmado: false, inscricaoConfirmada: true };
 }

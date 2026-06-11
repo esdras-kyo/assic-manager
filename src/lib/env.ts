@@ -13,6 +13,11 @@ const envSchema = z.object({
     .default("fake"),
   // Assinatura do webhook do FakeGateway — só desenvolvimento.
   FAKE_WEBHOOK_SECRET: z.string().min(1).default("fake-dev-secret"),
+  EMAIL_PROVIDER: z
+    .enum(["console", "resend"], {
+      error: "EMAIL_PROVIDER deve ser console ou resend",
+    })
+    .default("console"),
 });
 
 export type Env = z.infer<typeof envSchema>;
