@@ -52,6 +52,40 @@ export function reaisParaCentavos(valor: string): number | null {
   return Math.round(reais * 100);
 }
 
+/** "São João 2026!" → "sao-joao-2026" (slug de URL). */
+export function gerarSlug(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // remove acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// Eventos acontecem em São Paulo (fuso fixo -03:00 — Brasil sem DST desde
+// 2019). O servidor pode rodar em UTC (Vercel): nunca interpretar
+// datetime-local com o fuso do servidor.
+const OFFSET_SP = "-03:00";
+
+/** "2026-07-10T16:00" (horário SP do input) → Date UTC. */
+export function inputLocalParaData(valor: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(valor)) return null;
+  const data = new Date(`${valor}:00${OFFSET_SP}`);
+  return Number.isNaN(data.getTime()) ? null : data;
+}
+
+const inputLocalFormatador = new Intl.DateTimeFormat("sv-SE", {
+  // sv-SE produz "YYYY-MM-DD HH:mm" — vira valor de datetime-local com 1 replace
+  dateStyle: "short",
+  timeStyle: "short",
+  timeZone: "America/Sao_Paulo",
+});
+
+/** Date UTC → valor de input datetime-local no horário de SP. */
+export function dataParaInputLocal(data: Date): string {
+  return inputLocalFormatador.format(data).replace(" ", "T");
+}
+
 /** Máscara incremental de CPF: digite e os pontos aparecem. */
 export function mascararCpf(valor: string): string {
   const d = normalizarDigitos(valor).slice(0, 11);

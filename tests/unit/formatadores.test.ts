@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  dataParaInputLocal,
   formatarDataExtensa,
   formatarPrecoBRL,
+  gerarSlug,
+  inputLocalParaData,
   mascararCelular,
   mascararCpf,
   reaisParaCentavos,
@@ -25,6 +28,40 @@ describe("formatarDataExtensa", () => {
     expect(r).toMatch(/julho/);
     expect(r).toMatch(/2026/);
     expect(r).toMatch(/16h/); // 19:00 UTC = 16:00 em São Paulo
+  });
+});
+
+describe("gerarSlug", () => {
+  it.each([
+    ["Encontro de Junho", "encontro-de-junho"],
+    ["São João 2026!", "sao-joao-2026"],
+    ["  Café & Prosa  ", "cafe-prosa"],
+    ["", ""],
+  ] as const)("%s → %s", (entrada, saida) => {
+    expect(gerarSlug(entrada)).toBe(saida);
+  });
+});
+
+describe("datetime-local ↔ UTC (fuso fixo de São Paulo, -03:00)", () => {
+  it("input local vira Date UTC correto independente do fuso do servidor", () => {
+    const d = inputLocalParaData("2026-07-10T16:00");
+    expect(d?.toISOString()).toBe("2026-07-10T19:00:00.000Z");
+  });
+
+  it("Date UTC vira string de input no horário de SP", () => {
+    expect(dataParaInputLocal(new Date("2026-07-10T19:00:00.000Z"))).toBe(
+      "2026-07-10T16:00",
+    );
+  });
+
+  it("roundtrip é estável", () => {
+    const original = "2026-12-25T08:30";
+    expect(dataParaInputLocal(inputLocalParaData(original)!)).toBe(original);
+  });
+
+  it("entrada inválida vira null", () => {
+    expect(inputLocalParaData("abc")).toBeNull();
+    expect(inputLocalParaData("")).toBeNull();
   });
 });
 
