@@ -11,6 +11,8 @@ const envSchema = z.object({
       error: "PAYMENT_PROVIDER deve ser fake, pagarme ou mercadopago",
     })
     .default("fake"),
+  // Assinatura do webhook do FakeGateway — só desenvolvimento.
+  FAKE_WEBHOOK_SECRET: z.string().min(1).default("fake-dev-secret"),
 });
 
 export type Env = z.infer<typeof envSchema>;
