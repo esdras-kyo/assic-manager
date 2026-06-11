@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Evento {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  nome            String
+  descricao       String?
+  local           String
+  dataInicio      DateTime
+  dataFim         DateTime?
+  precoEmCentavos Int // sempre centavos, nunca float
+  vagas           Int?
+  status          EventoStatus @default(RASCUNHO)
+  inscricoes      Inscricao[]
+  criadoEm        DateTime     @default(now())
+  atualizadoEm    DateTime     @updatedAt
+}
+
+enum EventoStatus {
+  RASCUNHO
+  ABERTO
+  ENCERRADO
+  CANCELADO
+}
+
+model Inscricao {
+  id           String          @id @default(cuid())
+  eventoId     String
+  evento       Evento          @relation(fields: [eventoId], references: [id])
+  nome         String
+  email        String
+  celular      String
+  documento    String // CPF
+  camposExtras Json? // campos extras coletados (flexível)
+  status       InscricaoStatus @default(PENDENTE)
+  pagamentos   Pagamento[]
+  criadoEm     DateTime        @default(now())
+  atualizadoEm DateTime        @updatedAt
+
+  @@index([eventoId])
+  @@index([status])
+}
+
+enum InscricaoStatus {
+  PENDENTE // criada, sem pagamento confirmado
+  CONFIRMADA // pagamento aprovado
+  CANCELADA
+  EXPIRADA // não pagou no prazo
+}
+
+model Pagamento {
+  id               String          @id @default(cuid())
+  inscricaoId      String
+  inscricao        Inscricao       @relation(fields: [inscricaoId], references: [id])
+  gateway          String // "pagarme", "mercadopago", "fake"
+  gatewayPaymentId String          @unique // id no gateway
+  metodo           MetodoPagamento
+  status           PagamentoStatus @default(PENDING)
+  amountInCents    Int
+  criadoEm         DateTime        @default(now())
+  atualizadoEm     DateTime        @updatedAt
+
+  @@index([inscricaoId])
+  @@index([gatewayPaymentId])
+}
+
+enum MetodoPagamento {
+  PIX
+  CREDIT_CARD
+}
+
+enum PagamentoStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  EXPIRED
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  senhaHash String
+  nome      String
+  criadoEm  DateTime @default(now())
+}
