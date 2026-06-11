@@ -32,6 +32,26 @@ export function formatarDataExtensa(data: Date): string {
   return `${dataExtensa.format(data)}, às ${hora}`;
 }
 
+/**
+ * Entrada de preço do admin → centavos (int). Aceita "50", "50,00",
+ * "1.234,56" (BR) e "50.5" (decimal com ponto). Inválido/negativo → null.
+ */
+export function reaisParaCentavos(valor: string): number | null {
+  const bruto = valor.trim();
+  if (!bruto) return null;
+
+  // Vírgula presente = formato BR: pontos são milhar, vírgula é decimal.
+  const normalizado = bruto.includes(",")
+    ? bruto.replace(/\./g, "").replace(",", ".")
+    : bruto;
+
+  if (!/^\d+(\.\d+)?$/.test(normalizado)) return null;
+
+  const reais = Number(normalizado);
+  if (!Number.isFinite(reais) || reais < 0) return null;
+  return Math.round(reais * 100);
+}
+
 /** Máscara incremental de CPF: digite e os pontos aparecem. */
 export function mascararCpf(valor: string): string {
   const d = normalizarDigitos(valor).slice(0, 11);

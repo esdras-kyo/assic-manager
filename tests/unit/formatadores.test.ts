@@ -5,6 +5,7 @@ import {
   formatarPrecoBRL,
   mascararCelular,
   mascararCpf,
+  reaisParaCentavos,
 } from "@/lib/formatadores";
 
 describe("formatarPrecoBRL", () => {
@@ -24,6 +25,22 @@ describe("formatarDataExtensa", () => {
     expect(r).toMatch(/julho/);
     expect(r).toMatch(/2026/);
     expect(r).toMatch(/16h/); // 19:00 UTC = 16:00 em São Paulo
+  });
+});
+
+describe("reaisParaCentavos (entrada de formulário admin)", () => {
+  it.each([
+    ["50", 5000],
+    ["50,00", 5000],
+    ["50.5", 5050],
+    ["1.234,56", 123456],
+    ["0", 0],
+  ] as const)("%s → %d", (entrada, saida) => {
+    expect(reaisParaCentavos(entrada)).toBe(saida);
+  });
+
+  it.each(["abc", "", "-5", "10,5,5"])("%s → null", (entrada) => {
+    expect(reaisParaCentavos(entrada)).toBeNull();
   });
 });
 
