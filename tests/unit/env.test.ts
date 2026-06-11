@@ -5,6 +5,7 @@ import { parseEnv } from "@/lib/env";
 const envValida = {
   DATABASE_URL: "postgresql://user:pass@host:6543/db?pgbouncer=true",
   PAYMENT_PROVIDER: "fake",
+  AUTH_SECRET: "um-segredo-de-teste-com-32-chars!!",
 };
 
 describe("parseEnv", () => {
@@ -15,8 +16,17 @@ describe("parseEnv", () => {
   });
 
   it("falha com mensagem citando a var quando DATABASE_URL falta", () => {
-    expect(() => parseEnv({ PAYMENT_PROVIDER: "fake" })).toThrowError(
-      /DATABASE_URL/,
+    const sem: Record<string, string> = { ...envValida };
+    delete sem.DATABASE_URL;
+    expect(() => parseEnv(sem)).toThrowError(/DATABASE_URL/);
+  });
+
+  it("AUTH_SECRET ausente ou curta falha", () => {
+    const sem: Record<string, string> = { ...envValida };
+    delete sem.AUTH_SECRET;
+    expect(() => parseEnv(sem)).toThrowError(/AUTH_SECRET/);
+    expect(() => parseEnv({ ...envValida, AUTH_SECRET: "curta" })).toThrowError(
+      /AUTH_SECRET/,
     );
   });
 
@@ -27,7 +37,9 @@ describe("parseEnv", () => {
   });
 
   it("PAYMENT_PROVIDER default é fake", () => {
-    const env = parseEnv({ DATABASE_URL: envValida.DATABASE_URL });
+    const sem: Record<string, string> = { ...envValida };
+    delete sem.PAYMENT_PROVIDER;
+    const env = parseEnv(sem);
     expect(env.PAYMENT_PROVIDER).toBe("fake");
   });
 });

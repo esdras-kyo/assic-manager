@@ -18,6 +18,10 @@ const envSchema = z.object({
       error: "EMAIL_PROVIDER deve ser console ou resend",
     })
     .default("console"),
+  // Assina o cookie de sessão do admin. Gerar com: openssl rand -base64 32
+  AUTH_SECRET: z
+    .string({ error: "AUTH_SECRET é obrigatória" })
+    .min(32, { error: "AUTH_SECRET precisa de pelo menos 32 caracteres" }),
 });
 
 export type Env = z.infer<typeof envSchema>;
