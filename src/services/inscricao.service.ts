@@ -28,6 +28,15 @@ export class InscricaoNaoEncontradaError extends Error {
   }
 }
 
+/** Inscrições que ocupam vaga: PENDENTE (reservada) + CONFIRMADA. */
+export async function contarInscricoesAtivas(
+  eventoId: string,
+): Promise<number> {
+  return prisma.inscricao.count({
+    where: { eventoId, status: { in: ["PENDENTE", "CONFIRMADA"] } },
+  });
+}
+
 export async function criarInscricao(
   input: InscricaoCreateInput,
 ): Promise<Inscricao> {

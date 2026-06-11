@@ -6,6 +6,7 @@ import { TransicaoInvalidaError } from "@/services/inscricao-maquina";
 import {
   cancelarInscricao,
   confirmarInscricao,
+  contarInscricoesAtivas,
   criarInscricao,
   EventoNaoAbertoError,
   expirarInscricao,
@@ -148,6 +149,20 @@ describe("criarInscricao", () => {
 
     await criarInscricao(inscricaoValida);
     expect(mocked.inscricao.count).not.toHaveBeenCalled();
+  });
+});
+
+describe("contarInscricoesAtivas", () => {
+  it("conta PENDENTE+CONFIRMADA do evento", async () => {
+    mocked.inscricao.count.mockResolvedValue(7);
+    const n = await contarInscricoesAtivas("evt1");
+    expect(n).toBe(7);
+    expect(mocked.inscricao.count).toHaveBeenCalledWith({
+      where: {
+        eventoId: "evt1",
+        status: { in: ["PENDENTE", "CONFIRMADA"] },
+      },
+    });
   });
 });
 
