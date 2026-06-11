@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: "Veja os próximos eventos com inscrições abertas.",
 };
 
+// Sem isto o Next congela a listagem no build — evento publicado depois
+// nunca apareceria. A lista deve sempre refletir o banco.
+export const dynamic = "force-dynamic";
+
 export default async function EventosPage() {
   const eventos = await listarEventosAbertos();
 

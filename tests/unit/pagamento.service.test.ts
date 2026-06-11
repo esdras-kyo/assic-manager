@@ -64,6 +64,8 @@ const pagamentoDb = {
   metodo: "PIX" as const,
   status: "PENDING" as const,
   amountInCents: 5000,
+  pixQrCode: null,
+  pixExpiresAt: null,
   criadoEm: new Date(),
   atualizadoEm: new Date(),
 };
@@ -112,6 +114,8 @@ describe("iniciarPagamento", () => {
         metodo: "PIX",
         status: "PENDING",
         amountInCents: 5000,
+        pixQrCode: "qr",
+        pixExpiresAt: expect.any(Date),
       },
     });
     expect(r.gatewayResult.pix?.qrCode).toBe("qr");

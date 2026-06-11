@@ -64,6 +64,10 @@ model Pagamento {
   metodo           MetodoPagamento
   status           PagamentoStatus @default(PENDING)
   amountInCents    Int
+  // Dados do Pix devolvidos pelo gateway na criação — persistidos para
+  // reexibir o código após refresh/retorno à página de pagamento.
+  pixQrCode        String?
+  pixExpiresAt     DateTime?
   criadoEm         DateTime        @default(now())
   atualizadoEm     DateTime        @updatedAt
 

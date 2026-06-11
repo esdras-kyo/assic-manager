@@ -87,6 +87,9 @@ export async function iniciarPagamento(input: {
       metodo: METODO_DB[input.metodo],
       status: mapStatusGatewayParaDb(gatewayResult.status),
       amountInCents: inscricao.evento.precoEmCentavos,
+      // Snapshot do Pix para reexibição após refresh.
+      pixQrCode: gatewayResult.pix?.qrCode ?? null,
+      pixExpiresAt: gatewayResult.pix?.expiresAt ?? null,
     },
   });
 
