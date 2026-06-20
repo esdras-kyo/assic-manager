@@ -35,6 +35,7 @@ export function PixManualPainel({ pix }: { pix: PixManual }) {
           type="button"
           size="lg"
           onClick={copiar}
+          aria-label={copiado ? "Chave copiada" : "Copiar chave PIX"}
           className="mt-4 h-14 w-full text-lg"
         >
           {copiado ? (
@@ -52,7 +53,9 @@ export function PixManualPainel({ pix }: { pix: PixManual }) {
       </div>
 
       {pix.instrucoes && (
-        <p className="text-lg leading-relaxed">{pix.instrucoes}</p>
+        <p className="text-lg leading-relaxed whitespace-pre-line">
+          {pix.instrucoes}
+        </p>
       )}
 
       <div
