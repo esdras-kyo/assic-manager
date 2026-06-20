@@ -86,6 +86,21 @@ describe("inscricaoCreateSchema", () => {
     const r = inscricaoCreateSchema.safeParse({ ...valida, nome: "Ma" });
     expect(r.success).toBe(false);
   });
+
+  it("aceita inscrição sem CPF (documento opcional)", () => {
+    const { documento: _omit, ...semCpf } = valida;
+    void _omit;
+    const r = inscricaoCreateSchema.safeParse(semCpf);
+    expect(r.success).toBe(true);
+  });
+
+  it("ainda rejeita CPF inválido quando enviado", () => {
+    const r = inscricaoCreateSchema.safeParse({
+      ...valida,
+      documento: "111.111.111-11",
+    });
+    expect(r.success).toBe(false);
+  });
 });
 
 describe("eventoCreateSchema", () => {

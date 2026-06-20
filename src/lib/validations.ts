@@ -49,9 +49,13 @@ export const inscricaoCreateSchema = z.object({
     })
     .transform(normalizarDigitos),
   documento: z
-    .string({ error: "Digite seu CPF" })
-    .refine(cpfValido, { error: "CPF inválido. Confira os números digitados" })
-    .transform(normalizarDigitos),
+    .string()
+    .trim()
+    .optional()
+    .refine((v) => !v || cpfValido(v), {
+      error: "CPF inválido. Confira os números digitados",
+    })
+    .transform((v) => (v ? normalizarDigitos(v) : undefined)),
   camposExtras: z.record(z.string(), z.unknown()).optional(),
 });
 

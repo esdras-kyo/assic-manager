@@ -70,7 +70,7 @@ export async function criarInscricao(
           nome: data.nome,
           email: data.email,
           celular: data.celular,
-          documento: data.documento,
+          documento: data.documento ?? null,
           ...(data.camposExtras !== undefined && {
             camposExtras: data.camposExtras as object,
           }),
