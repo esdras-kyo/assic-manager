@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       i.nome,
       i.email,
       i.celular,
-      i.documento,
+      i.documento ?? "",
       i.evento.nome,
       i.status,
       i.pagamentos[0]?.status ?? "",

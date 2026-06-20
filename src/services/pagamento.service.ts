@@ -74,7 +74,7 @@ export async function iniciarPagamento(input: {
       name: inscricao.nome,
       email: inscricao.email,
       phone: inscricao.celular,
-      document: inscricao.documento,
+      document: inscricao.documento ?? undefined,
     },
     metadata: { inscricaoId: inscricao.id, eventoId: inscricao.eventoId },
   });

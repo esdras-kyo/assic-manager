@@ -17,8 +17,12 @@ model Evento {
   dataFim         DateTime?
   precoEmCentavos Int // sempre centavos, nunca float
   vagas           Int?
-  status          EventoStatus @default(RASCUNHO)
-  inscricoes      Inscricao[]
+  status               EventoStatus        @default(RASCUNHO)
+  modalidadePagamento  ModalidadePagamento @default(GATEWAY)
+  pixManual            Json?
+  conteudo             Json?
+  camposPersonalizados Json?
+  inscricoes           Inscricao[]
   criadoEm        DateTime     @default(now())
   atualizadoEm    DateTime     @updatedAt
 }
@@ -30,6 +34,11 @@ enum EventoStatus {
   CANCELADO
 }
 
+enum ModalidadePagamento {
+  GATEWAY
+  MANUAL
+}
+
 model Inscricao {
   id           String          @id @default(cuid())
   eventoId     String
@@ -37,7 +46,7 @@ model Inscricao {
   nome         String
   email        String
   celular      String
-  documento    String // CPF
+  documento    String? // CPF — opcional; alguns eventos não coletam
   camposExtras Json? // campos extras coletados (flexível)
   status       InscricaoStatus @default(PENDENTE)
   pagamentos   Pagamento[]
