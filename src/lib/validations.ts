@@ -62,6 +62,14 @@ export const inscricaoCreateSchema = z.object({
 export type InscricaoCreateInput = z.input<typeof inscricaoCreateSchema>;
 export type InscricaoCreate = z.output<typeof inscricaoCreateSchema>;
 
+export const pixManualSchema = z.object({
+  chave: z.string().min(1),
+  tipoChave: z.string().min(1), // "cnpj", "cpf", "email", "telefone", "aleatoria"
+  beneficiario: z.string().min(1),
+  instrucoes: z.string().optional(),
+});
+export type PixManual = z.infer<typeof pixManualSchema>;
+
 const eventoBaseSchema = z.object({
   nome: z
     .string({ error: "Nome do evento é obrigatório" })
@@ -88,6 +96,8 @@ const eventoBaseSchema = z.object({
     .int({ error: "Vagas deve ser um número inteiro" })
     .positive({ error: "Vagas deve ser maior que zero" })
     .optional(),
+  modalidadePagamento: z.enum(["GATEWAY", "MANUAL"]).optional(),
+  pixManual: pixManualSchema.optional(),
 });
 
 const dataFimAposInicio = {
@@ -222,11 +232,3 @@ export const conteudoSchema = z.object({
   fotos: z.array(z.string()).optional(),
 });
 export type Conteudo = z.infer<typeof conteudoSchema>;
-
-export const pixManualSchema = z.object({
-  chave: z.string().min(1),
-  tipoChave: z.string().min(1), // "cnpj", "cpf", "email", "telefone", "aleatoria"
-  beneficiario: z.string().min(1),
-  instrucoes: z.string().optional(),
-});
-export type PixManual = z.infer<typeof pixManualSchema>;

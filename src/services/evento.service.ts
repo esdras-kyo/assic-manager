@@ -118,3 +118,7 @@ export async function buscarEventoPorSlug(
 ): Promise<Evento | null> {
   return prisma.evento.findUnique({ where: { slug } });
 }
+
+export async function buscarEventoPorId(id: string): Promise<Evento | null> {
+  return prisma.evento.findUnique({ where: { id } });
+}
