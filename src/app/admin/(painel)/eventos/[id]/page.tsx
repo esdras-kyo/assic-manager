@@ -85,6 +85,18 @@ export default async function EditarEventoPage({ params }: Props) {
               .toFixed(2)
               .replace(".", ","),
             vagas: evento.vagas?.toString() ?? "",
+            modalidadePagamento: evento.modalidadePagamento,
+            pixChave:
+              (evento.pixManual as { chave?: string } | null)?.chave ?? "",
+            pixTipoChave:
+              (evento.pixManual as { tipoChave?: string } | null)?.tipoChave ??
+              "",
+            pixBeneficiario:
+              (evento.pixManual as { beneficiario?: string } | null)
+                ?.beneficiario ?? "",
+            pixInstrucoes:
+              (evento.pixManual as { instrucoes?: string } | null)
+                ?.instrucoes ?? "",
           }}
         />
       </div>

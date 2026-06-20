@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { exigirAdmin } from "@/lib/auth";
 import { inputLocalParaData, reaisParaCentavos } from "@/lib/formatadores";
+import type { PixManual } from "@/lib/validations";
 import {
   atualizarEvento,
   cancelarEvento,
@@ -32,6 +33,11 @@ function lerCampos(formData: FormData): Record<string, string> {
     "dataFim",
     "precoReais",
     "vagas",
+    "modalidadePagamento",
+    "pixChave",
+    "pixTipoChave",
+    "pixBeneficiario",
+    "pixInstrucoes",
   ];
   return Object.fromEntries(
     campos.map((c) => [c, String(formData.get(c) ?? "").trim()]),
@@ -74,6 +80,34 @@ export async function salvarEventoAction(
     }
   }
 
+  const modalidadePagamento: "MANUAL" | "GATEWAY" =
+    v.modalidadePagamento === "MANUAL" ? "MANUAL" : "GATEWAY";
+
+  let pixManual: PixManual | undefined;
+  if (modalidadePagamento === "MANUAL") {
+    if (!v.pixChave) erros.pixChave = ["Informe a chave PIX"];
+    if (!v.pixBeneficiario) erros.pixBeneficiario = ["Informe o beneficiário"];
+    const TIPOS_VALIDOS = [
+      "cnpj",
+      "cpf",
+      "email",
+      "telefone",
+      "aleatoria",
+    ] as const;
+    type TipoChave = (typeof TIPOS_VALIDOS)[number];
+    const tipoChave: TipoChave = TIPOS_VALIDOS.includes(
+      v.pixTipoChave as TipoChave,
+    )
+      ? (v.pixTipoChave as TipoChave)
+      : "cnpj";
+    pixManual = {
+      chave: v.pixChave,
+      tipoChave,
+      beneficiario: v.pixBeneficiario,
+      ...(v.pixInstrucoes && { instrucoes: v.pixInstrucoes }),
+    };
+  }
+
   if (Object.keys(erros).length > 0) return { erros, valores: v };
 
   const input = {
@@ -85,6 +119,8 @@ export async function salvarEventoAction(
     dataFim,
     precoEmCentavos: precoEmCentavos!,
     vagas,
+    modalidadePagamento,
+    pixManual,
   };
 
   try {
