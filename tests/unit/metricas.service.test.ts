@@ -6,7 +6,7 @@ import { obterMetricas } from "@/services/metricas.service";
 vi.mock("@/lib/db", () => ({
   prisma: {
     evento: { count: vi.fn() },
-    inscricao: { count: vi.fn() },
+    inscricao: { count: vi.fn(), findMany: vi.fn() },
     pagamento: { aggregate: vi.fn() },
   },
 }));
@@ -26,6 +26,9 @@ describe("obterMetricas", () => {
     mocked.pagamento.aggregate.mockResolvedValue({
       _sum: { amountInCents: 75000 },
     } as never);
+    mocked.inscricao.findMany.mockResolvedValue([
+      { evento: { precoEmCentavos: 3500 } },
+    ] as never);
 
     const m = await obterMetricas();
 
@@ -33,7 +36,7 @@ describe("obterMetricas", () => {
       eventosAbertos: 2,
       inscricoesConfirmadas: 15,
       inscricoesPendentes: 4,
-      receitaCentavos: 75000,
+      receitaCentavos: 78500,
     });
     expect(mocked.pagamento.aggregate).toHaveBeenCalledWith({
       _sum: { amountInCents: true },
@@ -47,6 +50,7 @@ describe("obterMetricas", () => {
     mocked.pagamento.aggregate.mockResolvedValue({
       _sum: { amountInCents: null },
     } as never);
+    mocked.inscricao.findMany.mockResolvedValue([] as never);
 
     const m = await obterMetricas();
     expect(m.receitaCentavos).toBe(0);
