@@ -64,7 +64,7 @@ export type InscricaoCreate = z.output<typeof inscricaoCreateSchema>;
 
 export const pixManualSchema = z.object({
   chave: z.string().min(1),
-  tipoChave: z.string().min(1), // "cnpj", "cpf", "email", "telefone", "aleatoria"
+  tipoChave: z.enum(["cnpj", "cpf", "email", "telefone", "aleatoria"]),
   beneficiario: z.string().min(1),
   instrucoes: z.string().optional(),
 });
@@ -176,7 +176,7 @@ export function construirSchemaCampos(campos: CampoPersonalizado[]) {
         ? z.literal("on", {
             error: "Você precisa marcar esta opção para continuar",
           })
-        : z.string().optional();
+        : z.literal("on").optional();
     } else if (campo.tipo === "radio" || campo.tipo === "select") {
       const opcoes = (campo.opcoes ?? []) as [string, ...string[]];
       const base = z.enum(opcoes, { error: "Escolha uma opção" });

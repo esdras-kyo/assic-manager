@@ -218,4 +218,10 @@ describe("consultas", () => {
       where: { id: "evt1" },
     });
   });
+
+  it("buscarEventoPorId retorna null quando não encontrado", async () => {
+    mocked.findUnique.mockResolvedValue(null);
+    const r = await buscarEventoPorId("inexistente");
+    expect(r).toBeNull();
+  });
 });
