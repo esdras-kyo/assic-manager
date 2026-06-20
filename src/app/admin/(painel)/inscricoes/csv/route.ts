@@ -34,6 +34,17 @@ export async function GET(request: Request) {
     orderBy: { criadoEm: "desc" },
   });
 
+  // Colunas dinâmicas: união ordenada das chaves de camposExtras.
+  const chavesExtras = Array.from(
+    new Set(
+      inscricoes.flatMap((i) =>
+        i.camposExtras && typeof i.camposExtras === "object"
+          ? Object.keys(i.camposExtras as Record<string, unknown>)
+          : [],
+      ),
+    ),
+  ).sort();
+
   const csv = gerarCsv(
     [
       "Nome",
@@ -45,18 +56,27 @@ export async function GET(request: Request) {
       "Pagamento",
       "Valor",
       "Inscrito em",
+      ...chavesExtras,
     ],
-    inscricoes.map((i) => [
-      i.nome,
-      i.email,
-      i.celular,
-      i.documento ?? "",
-      i.evento.nome,
-      i.status,
-      i.pagamentos[0]?.status ?? "",
-      i.pagamentos[0] ? formatarPrecoBRL(i.pagamentos[0].amountInCents) : "",
-      dataCurta.format(i.criadoEm),
-    ]),
+    inscricoes.map((i) => {
+      const extras = (i.camposExtras ?? {}) as Record<string, unknown>;
+      return [
+        i.nome,
+        i.email,
+        i.celular,
+        i.documento ?? "",
+        i.evento.nome,
+        i.status,
+        i.pagamentos[0]?.status ?? "",
+        i.pagamentos[0] ? formatarPrecoBRL(i.pagamentos[0].amountInCents) : "",
+        dataCurta.format(i.criadoEm),
+        ...chavesExtras.map((k) =>
+          extras[k] === undefined || extras[k] === null
+            ? ""
+            : String(extras[k]),
+        ),
+      ];
+    }),
   );
 
   return new NextResponse(csv, {
