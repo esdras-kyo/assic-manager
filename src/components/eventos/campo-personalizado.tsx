@@ -27,9 +27,11 @@ export function CampoPersonalizadoInput({
 
   return (
     <fieldset className="space-y-2">
-      {campo.tipo === "radio" ? (
+      {/* radio: legenda do grupo; checkbox: rótulo é inline (abaixo); demais: Label */}
+      {campo.tipo === "radio" && (
         <legend className="text-lg font-bold">{campo.label}</legend>
-      ) : (
+      )}
+      {campo.tipo !== "radio" && campo.tipo !== "checkbox" && (
         <Label htmlFor={campo.id} className="text-lg font-bold">
           {campo.label}
         </Label>
@@ -106,6 +108,7 @@ export function CampoPersonalizadoInput({
                 value={op}
                 required={campo.obrigatorio}
                 defaultChecked={valor === op}
+                aria-describedby={descrito}
                 className="size-5 accent-primary"
               />
               {op}
