@@ -2,8 +2,15 @@
 
 import { redirect } from "next/navigation";
 
-import { inscricaoCreateSchema } from "@/lib/validations";
-import { EventoNaoEncontradoError } from "@/services/evento.service";
+import {
+  construirSchemaCampos,
+  inscricaoCreateSchema,
+  type CampoPersonalizado,
+} from "@/lib/validations";
+import {
+  buscarEventoPorId,
+  EventoNaoEncontradoError,
+} from "@/services/evento.service";
 import {
   criarInscricao,
   EventoNaoAbertoError,
@@ -18,33 +25,74 @@ export interface InscricaoFormState {
   valores?: Record<string, string>;
 }
 
+const CAMPOS_NUCLEO = ["nome", "email", "celular", "documento"] as const;
+
 export async function criarInscricaoEPagarAction(
   _prevState: InscricaoFormState | undefined,
   formData: FormData,
 ): Promise<InscricaoFormState | undefined> {
-  const valores = {
-    eventoId: String(formData.get("eventoId") ?? ""),
-    nome: String(formData.get("nome") ?? ""),
-    email: String(formData.get("email") ?? ""),
-    celular: String(formData.get("celular") ?? ""),
-    documento: String(formData.get("documento") ?? ""),
-  };
+  const eventoId = String(formData.get("eventoId") ?? "");
 
-  const parsed = inscricaoCreateSchema.safeParse(valores);
-  if (!parsed.success) {
+  const evento = await buscarEventoPorId(eventoId);
+  const campos = (evento?.camposPersonalizados ?? []) as CampoPersonalizado[];
+
+  // Eco de TODOS os valores digitados (núcleo + dinâmicos) para não perder nada.
+  const valores: Record<string, string> = { eventoId };
+  for (const c of CAMPOS_NUCLEO) valores[c] = String(formData.get(c) ?? "");
+  for (const campo of campos) {
+    valores[campo.id] = String(formData.get(campo.id) ?? "");
+  }
+
+  if (!evento) {
+    return {
+      mensagem: "Este evento não está mais recebendo inscrições.",
+      valores,
+    };
+  }
+
+  // Validação do núcleo.
+  const parsedNucleo = inscricaoCreateSchema.safeParse({
+    eventoId,
+    nome: valores.nome,
+    email: valores.email,
+    celular: valores.celular,
+    documento: valores.documento || undefined,
+  });
+
+  // Validação dos campos dinâmicos.
+  const valoresCampos: Record<string, string> = {};
+  for (const campo of campos) valoresCampos[campo.id] = valores[campo.id];
+  const parsedCampos = construirSchemaCampos(campos).safeParse(valoresCampos);
+
+  if (!parsedNucleo.success || !parsedCampos.success) {
     const erros: Record<string, string[]> = {};
-    for (const issue of parsed.error.issues) {
-      const campo = String(issue.path[0] ?? "form");
-      (erros[campo] ??= []).push(issue.message);
+    if (!parsedNucleo.success) {
+      for (const issue of parsedNucleo.error.issues) {
+        const campo = String(issue.path[0] ?? "form");
+        (erros[campo] ??= []).push(issue.message);
+      }
+    }
+    if (!parsedCampos.success) {
+      for (const issue of parsedCampos.error.issues) {
+        const campo = String(issue.path[0] ?? "form");
+        (erros[campo] ??= []).push(issue.message);
+      }
     }
     return { erros, valores };
   }
 
   let inscricaoId: string;
   try {
-    const inscricao = await criarInscricao(parsed.data);
+    const inscricao = await criarInscricao({
+      ...parsedNucleo.data,
+      camposExtras: parsedCampos.data as Record<string, unknown>,
+    });
     inscricaoId = inscricao.id;
-    await iniciarPagamento({ inscricaoId, metodo: "pix" });
+
+    // Ramo de pagamento: só GATEWAY gera Pix automático.
+    if (evento.modalidadePagamento === "GATEWAY") {
+      await iniciarPagamento({ inscricaoId, metodo: "pix" });
+    }
   } catch (erro) {
     if (erro instanceof SemVagasError) {
       return { mensagem: erro.message, valores };
