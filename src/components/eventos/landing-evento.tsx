@@ -117,23 +117,8 @@ export function LandingEvento({ conteudo }: { conteudo: Conteudo }) {
         </section>
       )}
 
-      {conteudo.textoFinal && (
-        <section>
-          <h2 className="text-2xl font-semibold">
-            {conteudo.textoFinal.titulo}
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed">
-            {conteudo.textoFinal.corpo}
-          </p>
-          {conteudo.textoFinal.contatos?.length ? (
-            <ul className="mt-4 space-y-2 text-lg">
-              {conteudo.textoFinal.contatos.map((contato) => (
-                <li key={contato}>{contato}</li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
-      )}
+      {/* textoFinal é a mensagem PÓS-inscrição (PDF: "texto final após enviar").
+          Não pertence à landing pré-inscrição — exibido após o envio. */}
     </div>
   );
 }
