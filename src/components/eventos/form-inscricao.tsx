@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { mascararCelular, mascararCpf } from "@/lib/formatadores";
+import { CampoPersonalizadoInput } from "@/components/eventos/campo-personalizado";
+import type { CampoPersonalizado } from "@/lib/validations";
 
 interface CampoProps {
   id: string;
@@ -69,7 +71,13 @@ function BotaoEnviar() {
   );
 }
 
-export function FormInscricao({ eventoId }: { eventoId: string }) {
+export function FormInscricao({
+  eventoId,
+  campos,
+}: {
+  eventoId: string;
+  campos: CampoPersonalizado[];
+}) {
   const [state, formAction] = useActionState<
     InscricaoFormState | undefined,
     FormData
@@ -172,6 +180,15 @@ export function FormInscricao({ eventoId }: { eventoId: string }) {
           className={alturaCampo}
         />
       </Campo>
+
+      {campos.map((campo) => (
+        <CampoPersonalizadoInput
+          key={campo.id}
+          campo={campo}
+          erros={state?.erros?.[campo.id]}
+          valor={state?.valores?.[campo.id]}
+        />
+      ))}
 
       <BotaoEnviar />
 
