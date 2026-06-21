@@ -50,6 +50,7 @@ export default async function InscricaoPage({ params }: Props) {
         <FormInscricao
           eventoId={evento.id}
           campos={(evento.camposPersonalizados ?? []) as CampoPersonalizado[]}
+          modalidade={evento.modalidadePagamento}
         />
       </div>
     </div>

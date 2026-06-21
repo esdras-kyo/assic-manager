@@ -50,7 +50,7 @@ function Campo({ id, rotulo, ajuda, erros, children }: CampoProps) {
   );
 }
 
-function BotaoEnviar() {
+function BotaoEnviar({ manual }: { manual: boolean }) {
   const { pending } = useFormStatus();
   return (
     <Button
@@ -64,6 +64,8 @@ function BotaoEnviar() {
           <LoaderCircle aria-hidden className="size-5 animate-spin" />
           Enviando sua inscrição…
         </>
+      ) : manual ? (
+        "Confirmar inscrição"
       ) : (
         "Confirmar inscrição e gerar Pix"
       )}
@@ -74,10 +76,13 @@ function BotaoEnviar() {
 export function FormInscricao({
   eventoId,
   campos,
+  modalidade,
 }: {
   eventoId: string;
   campos: CampoPersonalizado[];
+  modalidade: "GATEWAY" | "MANUAL";
 }) {
+  const manual = modalidade === "MANUAL";
   const [state, formAction] = useActionState<
     InscricaoFormState | undefined,
     FormData
@@ -165,12 +170,15 @@ export function FormInscricao({
         />
       </Campo>
 
-      <Campo id="documento" rotulo="CPF" erros={state?.erros?.documento}>
+      <Campo
+        id="documento"
+        rotulo="CPF (opcional)"
+        erros={state?.erros?.documento}
+      >
         <Input
           id="documento"
           name="documento"
           inputMode="numeric"
-          required
           defaultValue={state?.valores?.documento}
           onChange={aoDigitarCpf}
           aria-invalid={Boolean(state?.erros?.documento?.length)}
@@ -190,10 +198,12 @@ export function FormInscricao({
         />
       ))}
 
-      <BotaoEnviar />
+      <BotaoEnviar manual={manual} />
 
       <p className="text-center text-muted-foreground">
-        Depois de confirmar, você verá o código Pix para pagar.
+        {manual
+          ? "Depois de confirmar, você verá a chave Pix para pagar."
+          : "Depois de confirmar, você verá o código Pix para pagar."}
       </p>
     </form>
   );
