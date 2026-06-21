@@ -49,14 +49,26 @@ export const inscricaoCreateSchema = z.object({
     })
     .transform(normalizarDigitos),
   documento: z
-    .string({ error: "Digite seu CPF" })
-    .refine(cpfValido, { error: "CPF inválido. Confira os números digitados" })
-    .transform(normalizarDigitos),
+    .string()
+    .trim()
+    .optional()
+    .refine((v) => !v || cpfValido(v), {
+      error: "CPF inválido. Confira os números digitados",
+    })
+    .transform((v) => (v ? normalizarDigitos(v) : undefined)),
   camposExtras: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type InscricaoCreateInput = z.input<typeof inscricaoCreateSchema>;
 export type InscricaoCreate = z.output<typeof inscricaoCreateSchema>;
+
+export const pixManualSchema = z.object({
+  chave: z.string().min(1),
+  tipoChave: z.enum(["cnpj", "cpf", "email", "telefone", "aleatoria"]),
+  beneficiario: z.string().min(1),
+  instrucoes: z.string().optional(),
+});
+export type PixManual = z.infer<typeof pixManualSchema>;
 
 const eventoBaseSchema = z.object({
   nome: z
@@ -84,6 +96,8 @@ const eventoBaseSchema = z.object({
     .int({ error: "Vagas deve ser um número inteiro" })
     .positive({ error: "Vagas deve ser maior que zero" })
     .optional(),
+  modalidadePagamento: z.enum(["GATEWAY", "MANUAL"]).optional(),
+  pixManual: pixManualSchema.optional(),
 });
 
 const dataFimAposInicio = {
@@ -111,3 +125,110 @@ export const eventoUpdateSchema = eventoBaseSchema
 
 export type EventoUpdateInput = z.input<typeof eventoUpdateSchema>;
 export type EventoUpdate = z.output<typeof eventoUpdateSchema>;
+
+// --- Campos personalizados por evento ---
+
+export const TIPOS_CAMPO = [
+  "texto",
+  "email",
+  "tel",
+  "textarea",
+  "radio",
+  "select",
+  "checkbox",
+] as const;
+export type TipoCampo = (typeof TIPOS_CAMPO)[number];
+
+export const campoPersonalizadoSchema = z
+  .object({
+    id: z.string().regex(/^[a-zA-Z][a-zA-Z0-9]*$/, {
+      error: "id de campo deve ser alfanumérico começando por letra",
+    }),
+    label: z.string().min(1),
+    tipo: z.enum(TIPOS_CAMPO),
+    obrigatorio: z.boolean(),
+    opcoes: z.array(z.string().min(1)).optional(),
+    ajuda: z.string().optional(),
+    autoComplete: z.string().optional(),
+  })
+  .refine(
+    (c) =>
+      (c.tipo !== "radio" && c.tipo !== "select") ||
+      (c.opcoes !== undefined && c.opcoes.length > 0),
+    { error: "Campos radio/select precisam de opções", path: ["opcoes"] },
+  );
+
+export type CampoPersonalizado = z.infer<typeof campoPersonalizadoSchema>;
+
+export const camposPersonalizadosSchema = z.array(campoPersonalizadoSchema);
+
+/**
+ * Constrói um Zod object para validar as RESPOSTAS dos campos personalizados.
+ * Valores vêm de FormData (strings); checkbox marcado = "on".
+ */
+export function construirSchemaCampos(campos: CampoPersonalizado[]) {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  for (const campo of campos) {
+    let validador: z.ZodTypeAny;
+
+    if (campo.tipo === "checkbox") {
+      validador = campo.obrigatorio
+        ? z.literal("on", {
+            error: "Você precisa marcar esta opção para continuar",
+          })
+        : z.literal("on").optional();
+    } else if (campo.tipo === "radio" || campo.tipo === "select") {
+      const opcoes = (campo.opcoes ?? []) as [string, ...string[]];
+      const base = z.enum(opcoes, { error: "Escolha uma opção" });
+      validador = campo.obrigatorio ? base : z.optional(base).or(z.literal(""));
+    } else if (campo.tipo === "email") {
+      const base = z.email({ error: "Digite um email válido" });
+      validador = campo.obrigatorio ? base : base.or(z.literal(""));
+    } else {
+      const base = z.string().trim();
+      validador = campo.obrigatorio
+        ? base.min(1, { error: `${campo.label} é obrigatório` })
+        : base.optional();
+    }
+
+    shape[campo.id] = validador;
+  }
+  return z.object(shape);
+}
+
+// --- Conteúdo estruturado da landing ---
+
+export const conteudoSchema = z.object({
+  subtitulo: z.string().optional(),
+  apresentacao: z.array(z.string()).optional(),
+  destaques: z.array(z.string()).optional(),
+  horarios: z
+    .array(z.object({ dia: z.string(), blocos: z.array(z.string()) }))
+    .optional(),
+  oQueEncontrara: z.array(z.string()).optional(),
+  programacao: z
+    .array(
+      z.object({
+        dia: z.string(),
+        periodos: z.array(
+          z.object({
+            titulo: z.string().optional(),
+            itens: z.array(z.string()),
+          }),
+        ),
+      }),
+    )
+    .optional(),
+  investimento: z
+    .object({ valorTexto: z.string(), inclui: z.string().optional() })
+    .optional(),
+  textoFinal: z
+    .object({
+      titulo: z.string(),
+      corpo: z.string(),
+      contatos: z.array(z.string()).optional(),
+    })
+    .optional(),
+  fotos: z.array(z.string()).optional(),
+});
+export type Conteudo = z.infer<typeof conteudoSchema>;

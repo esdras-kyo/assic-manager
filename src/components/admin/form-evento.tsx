@@ -24,6 +24,11 @@ export interface EventoFormValores {
   dataFim?: string;
   precoReais?: string;
   vagas?: string;
+  modalidadePagamento?: string;
+  pixChave?: string;
+  pixTipoChave?: string;
+  pixBeneficiario?: string;
+  pixInstrucoes?: string;
 }
 
 function Erros({ id, lista }: { id: string; lista?: string[] }) {
@@ -72,6 +77,9 @@ export function FormEvento({ inicial }: { inicial?: EventoFormValores }) {
   // Slug acompanha o nome até a pessoa editar o slug manualmente.
   const [slug, setSlug] = useState(inicial?.slug ?? "");
   const [slugManual, setSlugManual] = useState(editando);
+  const [modalidade, setModalidade] = useState(
+    inicial?.modalidadePagamento ?? "GATEWAY",
+  );
 
   const valores = { ...inicial, ...state?.valores };
 
@@ -187,6 +195,61 @@ export function FormEvento({ inicial }: { inicial?: EventoFormValores }) {
           <Erros id="vagas" lista={state?.erros?.vagas} />
         </div>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="modalidadePagamento">Forma de pagamento</Label>
+        <select
+          id="modalidadePagamento"
+          name="modalidadePagamento"
+          defaultValue={valores?.modalidadePagamento ?? "GATEWAY"}
+          onChange={(e) => setModalidade(e.target.value)}
+          className="h-11 w-full rounded-lg border border-input bg-card px-3"
+        >
+          <option value="GATEWAY">Automático (gateway/QR Code)</option>
+          <option value="MANUAL">Manual (chave PIX + validação)</option>
+        </select>
+      </div>
+
+      {modalidade === "MANUAL" && (
+        <div className="space-y-4 rounded-lg border border-border p-4">
+          <div className="space-y-2">
+            <Label htmlFor="pixChave">Chave PIX</Label>
+            <Input
+              id="pixChave"
+              name="pixChave"
+              defaultValue={valores?.pixChave}
+            />
+            <Erros id="pixChave" lista={state?.erros?.pixChave} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pixTipoChave">Tipo da chave</Label>
+            <Input
+              id="pixTipoChave"
+              name="pixTipoChave"
+              placeholder="cnpj"
+              defaultValue={valores?.pixTipoChave}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pixBeneficiario">Beneficiário</Label>
+            <Input
+              id="pixBeneficiario"
+              name="pixBeneficiario"
+              defaultValue={valores?.pixBeneficiario}
+            />
+            <Erros id="pixBeneficiario" lista={state?.erros?.pixBeneficiario} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pixInstrucoes">Instruções (opcional)</Label>
+            <Textarea
+              id="pixInstrucoes"
+              name="pixInstrucoes"
+              rows={2}
+              defaultValue={valores?.pixInstrucoes}
+            />
+          </div>
+        </div>
+      )}
 
       <BotaoSalvar editando={editando} />
     </form>

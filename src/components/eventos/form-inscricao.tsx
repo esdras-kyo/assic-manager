@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { mascararCelular, mascararCpf } from "@/lib/formatadores";
+import { CampoPersonalizadoInput } from "@/components/eventos/campo-personalizado";
+import type { CampoPersonalizado } from "@/lib/validations";
 
 interface CampoProps {
   id: string;
@@ -48,7 +50,7 @@ function Campo({ id, rotulo, ajuda, erros, children }: CampoProps) {
   );
 }
 
-function BotaoEnviar() {
+function BotaoEnviar({ manual }: { manual: boolean }) {
   const { pending } = useFormStatus();
   return (
     <Button
@@ -62,6 +64,8 @@ function BotaoEnviar() {
           <LoaderCircle aria-hidden className="size-5 animate-spin" />
           Enviando sua inscrição…
         </>
+      ) : manual ? (
+        "Confirmar inscrição"
       ) : (
         "Confirmar inscrição e gerar Pix"
       )}
@@ -69,7 +73,16 @@ function BotaoEnviar() {
   );
 }
 
-export function FormInscricao({ eventoId }: { eventoId: string }) {
+export function FormInscricao({
+  eventoId,
+  campos,
+  modalidade,
+}: {
+  eventoId: string;
+  campos: CampoPersonalizado[];
+  modalidade: "GATEWAY" | "MANUAL";
+}) {
+  const manual = modalidade === "MANUAL";
   const [state, formAction] = useActionState<
     InscricaoFormState | undefined,
     FormData
@@ -157,12 +170,15 @@ export function FormInscricao({ eventoId }: { eventoId: string }) {
         />
       </Campo>
 
-      <Campo id="documento" rotulo="CPF" erros={state?.erros?.documento}>
+      <Campo
+        id="documento"
+        rotulo="CPF (opcional)"
+        erros={state?.erros?.documento}
+      >
         <Input
           id="documento"
           name="documento"
           inputMode="numeric"
-          required
           defaultValue={state?.valores?.documento}
           onChange={aoDigitarCpf}
           aria-invalid={Boolean(state?.erros?.documento?.length)}
@@ -173,10 +189,21 @@ export function FormInscricao({ eventoId }: { eventoId: string }) {
         />
       </Campo>
 
-      <BotaoEnviar />
+      {campos.map((campo) => (
+        <CampoPersonalizadoInput
+          key={campo.id}
+          campo={campo}
+          erros={state?.erros?.[campo.id]}
+          valor={state?.valores?.[campo.id]}
+        />
+      ))}
+
+      <BotaoEnviar manual={manual} />
 
       <p className="text-center text-muted-foreground">
-        Depois de confirmar, você verá o código Pix para pagar.
+        {manual
+          ? "Depois de confirmar, você verá a chave Pix para pagar."
+          : "Depois de confirmar, você verá o código Pix para pagar."}
       </p>
     </form>
   );

@@ -14,7 +14,7 @@ export interface CreatePaymentInput {
   amountInCents: number;
   method: PaymentMethod;
   description: string;
-  customer: { name: string; email: string; phone: string; document: string };
+  customer: { name: string; email: string; phone: string; document?: string };
   metadata: { inscricaoId: string; eventoId: string };
 }
 

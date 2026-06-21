@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { LandingEvento } from "@/components/eventos/landing-evento";
 import { formatarDataExtensa, formatarPrecoBRL } from "@/lib/formatadores";
+import type { Conteudo } from "@/lib/validations";
 import { buscarEventoPorSlug } from "@/services/evento.service";
 import { contarInscricoesAtivas } from "@/services/inscricao.service";
 
@@ -93,10 +95,16 @@ export default async function EventoPage({ params }: Props) {
         )}
       </dl>
 
-      {evento.descricao && (
-        <p className="mt-8 text-lg leading-relaxed whitespace-pre-line text-muted-foreground">
-          {evento.descricao}
-        </p>
+      {evento.conteudo ? (
+        <div className="mt-10">
+          <LandingEvento conteudo={evento.conteudo as Conteudo} />
+        </div>
+      ) : (
+        evento.descricao && (
+          <p className="mt-8 text-lg leading-relaxed whitespace-pre-line text-muted-foreground">
+            {evento.descricao}
+          </p>
+        )
       )}
 
       <div className="mt-10">

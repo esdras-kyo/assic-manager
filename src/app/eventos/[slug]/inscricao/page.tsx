@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { FormInscricao } from "@/components/eventos/form-inscricao";
 import { formatarDataExtensa, formatarPrecoBRL } from "@/lib/formatadores";
+import type { CampoPersonalizado } from "@/lib/validations";
 import { buscarEventoPorSlug } from "@/services/evento.service";
 import { contarInscricoesAtivas } from "@/services/inscricao.service";
 
@@ -46,7 +47,11 @@ export default async function InscricaoPage({ params }: Props) {
       </div>
 
       <div className="mt-10">
-        <FormInscricao eventoId={evento.id} />
+        <FormInscricao
+          eventoId={evento.id}
+          campos={(evento.camposPersonalizados ?? []) as CampoPersonalizado[]}
+          modalidade={evento.modalidadePagamento}
+        />
       </div>
     </div>
   );

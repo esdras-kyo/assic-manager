@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import {
   atualizarEvento,
+  buscarEventoPorId,
   buscarEventoPorSlug,
   cancelarEvento,
   criarEvento,
@@ -46,6 +47,10 @@ const eventoDb = {
   precoEmCentavos: 5000,
   vagas: null,
   status: "RASCUNHO" as const,
+  modalidadePagamento: "GATEWAY" as const,
+  pixManual: null,
+  conteudo: null,
+  camposPersonalizados: null,
   criadoEm: new Date(),
   atualizadoEm: new Date(),
 };
@@ -167,6 +172,28 @@ describe("atualizarEvento", () => {
   });
 });
 
+describe("criarEvento com modalidade", () => {
+  it("repassa modalidadePagamento e pixManual ao criar", async () => {
+    mocked.create.mockResolvedValue({ id: "e1" } as never);
+    await criarEvento({
+      nome: "Evento Manual",
+      slug: "evento-manual",
+      local: "Local",
+      dataInicio: new Date("2030-01-01T12:00:00.000Z"),
+      precoEmCentavos: 3500,
+      modalidadePagamento: "MANUAL",
+      pixManual: {
+        chave: "26.619.189/0001-99",
+        tipoChave: "cnpj",
+        beneficiario: "Associação",
+      },
+    } as never);
+    expect(mocked.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ modalidadePagamento: "MANUAL" }),
+    });
+  });
+});
+
 describe("consultas", () => {
   it("listarEventosAbertos filtra por ABERTO", async () => {
     mocked.findMany.mockResolvedValue([]);
@@ -182,5 +209,19 @@ describe("consultas", () => {
     expect(mocked.findUnique).toHaveBeenCalledWith({
       where: { slug: "encontro-de-junho" },
     });
+  });
+
+  it("buscarEventoPorId usa o id", async () => {
+    mocked.findUnique.mockResolvedValue(eventoDb);
+    await buscarEventoPorId("evt1");
+    expect(mocked.findUnique).toHaveBeenCalledWith({
+      where: { id: "evt1" },
+    });
+  });
+
+  it("buscarEventoPorId retorna null quando não encontrado", async () => {
+    mocked.findUnique.mockResolvedValue(null);
+    const r = await buscarEventoPorId("inexistente");
+    expect(r).toBeNull();
   });
 });

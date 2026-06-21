@@ -53,6 +53,10 @@ const eventoAberto = {
   precoEmCentavos: 5000,
   vagas: null,
   status: "ABERTO" as const,
+  modalidadePagamento: "GATEWAY" as const,
+  pixManual: null,
+  conteudo: null,
+  camposPersonalizados: null,
   criadoEm: new Date(),
   atualizadoEm: new Date(),
 };

@@ -4,10 +4,12 @@ import { notFound, redirect } from "next/navigation";
 import { CircleAlert, RotateCcw } from "lucide-react";
 
 import { regerarPixAction } from "@/app/pagamento/[inscricaoId]/actions";
+import { PixManualPainel } from "@/components/eventos/pix-manual-painel";
 import { PixPainel } from "@/components/eventos/pix-painel";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { formatarPrecoBRL } from "@/lib/formatadores";
+import type { PixManual } from "@/lib/validations";
 
 export const metadata: Metadata = { title: "Pagamento" };
 
@@ -33,6 +35,45 @@ export default async function PagamentoPage({ params }: Props) {
   }
   if (inscricao.status !== "PENDENTE") {
     redirect(`/pagamento/${inscricaoId}/falha`);
+  }
+
+  // Evento com pagamento MANUAL: mostra chave fixa, sem gateway/polling.
+  if (inscricao.evento.modalidadePagamento === "MANUAL") {
+    const pix = inscricao.evento.pixManual as PixManual | null;
+    return (
+      <div className="mx-auto w-full max-w-xl px-4 py-12 sm:px-6 sm:py-16">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          Pagamento via Pix
+        </h1>
+        <div className="mt-6 rounded-xl border border-border bg-secondary p-5">
+          <p className="text-xl font-bold">{inscricao.evento.nome}</p>
+          <p className="mt-1 text-muted-foreground">
+            Inscrição de {inscricao.nome.split(" ")[0]}
+          </p>
+          <p className="mt-2 text-2xl font-bold text-primary">
+            {formatarPrecoBRL(inscricao.evento.precoEmCentavos)}
+          </p>
+        </div>
+        <div className="mt-10">
+          {pix ? (
+            <PixManualPainel pix={pix} />
+          ) : (
+            <p className="text-lg text-muted-foreground">
+              A chave PIX deste evento ainda não foi configurada. Fale com a
+              organização.
+            </p>
+          )}
+        </div>
+        <p className="mt-10 text-center">
+          <Link
+            href={`/eventos/${inscricao.evento.slug}`}
+            className="font-semibold text-primary underline underline-offset-4"
+          >
+            Voltar para a página do evento
+          </Link>
+        </p>
+      </div>
+    );
   }
 
   const pagamento = inscricao.pagamentos[0];

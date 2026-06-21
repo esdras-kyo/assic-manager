@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Download } from "lucide-react";
 
+import { AcoesInscricao } from "@/components/admin/acoes-inscricao";
 import { BadgeStatus } from "@/components/admin/badge-status";
 import { Button } from "@/components/ui/button";
 import { exigirAdmin } from "@/lib/auth";
@@ -42,7 +43,7 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
         ...(statusFiltro && { status: statusFiltro }),
       },
       include: {
-        evento: { select: { nome: true } },
+        evento: { select: { nome: true, modalidadePagamento: true } },
         pagamentos: { orderBy: { criadoEm: "desc" }, take: 1 },
       },
       orderBy: { criadoEm: "desc" },
@@ -127,6 +128,7 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
                 <th className="px-4 py-3">Inscrição</th>
                 <th className="px-4 py-3">Pagamento</th>
                 <th className="px-4 py-3">Quando</th>
+                <th className="px-4 py-3">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -150,6 +152,16 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {dataCurta.format(i.criadoEm)}
+                  </td>
+                  <td className="px-4 py-3">
+                    {/* Validação manual só faz sentido em evento MANUAL —
+                        GATEWAY confirma sozinho via webhook (sem footgun). */}
+                    {i.status === "PENDENTE" &&
+                    i.evento.modalidadePagamento === "MANUAL" ? (
+                      <AcoesInscricao id={i.id} />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}

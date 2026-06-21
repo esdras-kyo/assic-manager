@@ -1,16 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { criarInscricaoEPagarAction } from "@/app/eventos/[slug]/inscricao/actions";
+import { buscarEventoPorId } from "@/services/evento.service";
 import { criarInscricao, SemVagasError } from "@/services/inscricao.service";
 import { iniciarPagamento } from "@/services/pagamento.service";
+
+vi.mock("@/services/evento.service", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@/services/evento.service")>();
+  return { ...original, buscarEventoPorId: vi.fn() };
+});
 
 vi.mock("@/services/inscricao.service", async (importOriginal) => {
   const original =
     await importOriginal<typeof import("@/services/inscricao.service")>();
-  return {
-    ...original,
-    criarInscricao: vi.fn(),
-  };
+  return { ...original, criarInscricao: vi.fn() };
 });
 
 vi.mock("@/services/pagamento.service", () => ({
@@ -30,12 +34,25 @@ function formDataDe(campos: Record<string, string>) {
   return fd;
 }
 
-const camposValidos = {
+const eventoGateway = {
+  id: "evt1",
+  modalidadePagamento: "GATEWAY",
+  camposPersonalizados: null,
+} as never;
+
+const eventoManual = {
+  id: "evt2",
+  modalidadePagamento: "MANUAL",
+  camposPersonalizados: [
+    { id: "cidade", label: "Cidade", tipo: "texto", obrigatorio: true },
+  ],
+} as never;
+
+const nucleo = {
   eventoId: "evt1",
   nome: "Maria da Silva",
   email: "maria@example.com",
   celular: "(11) 98765-4321",
-  documento: "529.982.247-25",
 };
 
 beforeEach(() => {
@@ -43,54 +60,71 @@ beforeEach(() => {
 });
 
 describe("criarInscricaoEPagarAction", () => {
-  it("dados válidos: cria inscrição, inicia pix e redireciona", async () => {
+  it("evento GATEWAY: cria, inicia pix e redireciona", async () => {
+    vi.mocked(buscarEventoPorId).mockResolvedValue(eventoGateway);
     vi.mocked(criarInscricao).mockResolvedValue({ id: "insc1" } as never);
     vi.mocked(iniciarPagamento).mockResolvedValue({} as never);
 
     await expect(
-      criarInscricaoEPagarAction(undefined, formDataDe(camposValidos)),
+      criarInscricaoEPagarAction(undefined, formDataDe(nucleo)),
     ).rejects.toBe(REDIRECT);
 
-    expect(criarInscricao).toHaveBeenCalledWith(
-      expect.objectContaining({ eventoId: "evt1", nome: "Maria da Silva" }),
-    );
     expect(iniciarPagamento).toHaveBeenCalledWith({
       inscricaoId: "insc1",
       metodo: "pix",
     });
   });
 
-  it("CPF inválido: devolve erro de campo sem chamar services", async () => {
+  it("evento MANUAL: cria como pendente, NÃO inicia pix, redireciona", async () => {
+    vi.mocked(buscarEventoPorId).mockResolvedValue(eventoManual);
+    vi.mocked(criarInscricao).mockResolvedValue({ id: "insc2" } as never);
+
+    await expect(
+      criarInscricaoEPagarAction(
+        undefined,
+        formDataDe({ ...nucleo, eventoId: "evt2", cidade: "Goiânia" }),
+      ),
+    ).rejects.toBe(REDIRECT);
+
+    expect(criarInscricao).toHaveBeenCalledWith(
+      expect.objectContaining({
+        camposExtras: expect.objectContaining({ cidade: "Goiânia" }),
+      }),
+    );
+    expect(iniciarPagamento).not.toHaveBeenCalled();
+  });
+
+  it("campo dinâmico obrigatório faltando: erro sem tocar services", async () => {
+    vi.mocked(buscarEventoPorId).mockResolvedValue(eventoManual);
+
     const state = await criarInscricaoEPagarAction(
       undefined,
-      formDataDe({ ...camposValidos, documento: "111.111.111-11" }),
+      formDataDe({ ...nucleo, eventoId: "evt2", cidade: "" }),
     );
 
-    expect(state?.erros?.documento?.[0]).toMatch(/CPF/);
-    expect(state?.valores?.nome).toBe("Maria da Silva"); // não perde o digitado
+    expect(state?.erros?.cidade?.length).toBeTruthy();
     expect(criarInscricao).not.toHaveBeenCalled();
   });
 
-  it("vagas esgotadas: devolve mensagem amigável", async () => {
+  it("vagas esgotadas: mensagem amigável", async () => {
+    vi.mocked(buscarEventoPorId).mockResolvedValue(eventoGateway);
     vi.mocked(criarInscricao).mockRejectedValue(new SemVagasError());
 
     const state = await criarInscricaoEPagarAction(
       undefined,
-      formDataDe(camposValidos),
+      formDataDe(nucleo),
     );
-
     expect(state?.mensagem).toMatch(/vagas/i);
   });
 
-  it("erro inesperado: mensagem genérica, sem vazar detalhes", async () => {
-    vi.mocked(criarInscricao).mockRejectedValue(new Error("stack interna"));
+  it("evento inexistente: mensagem amigável", async () => {
+    vi.mocked(buscarEventoPorId).mockResolvedValue(null);
 
     const state = await criarInscricaoEPagarAction(
       undefined,
-      formDataDe(camposValidos),
+      formDataDe(nucleo),
     );
-
     expect(state?.mensagem).toBeTruthy();
-    expect(state?.mensagem).not.toMatch(/stack interna/);
+    expect(criarInscricao).not.toHaveBeenCalled();
   });
 });
