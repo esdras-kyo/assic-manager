@@ -43,7 +43,7 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
         ...(statusFiltro && { status: statusFiltro }),
       },
       include: {
-        evento: { select: { nome: true } },
+        evento: { select: { nome: true, modalidadePagamento: true } },
         pagamentos: { orderBy: { criadoEm: "desc" }, take: 1 },
       },
       orderBy: { criadoEm: "desc" },
@@ -154,7 +154,10 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
                     {dataCurta.format(i.criadoEm)}
                   </td>
                   <td className="px-4 py-3">
-                    {i.status === "PENDENTE" ? (
+                    {/* Validação manual só faz sentido em evento MANUAL —
+                        GATEWAY confirma sozinho via webhook (sem footgun). */}
+                    {i.status === "PENDENTE" &&
+                    i.evento.modalidadePagamento === "MANUAL" ? (
                       <AcoesInscricao id={i.id} />
                     ) : (
                       <span className="text-muted-foreground">—</span>

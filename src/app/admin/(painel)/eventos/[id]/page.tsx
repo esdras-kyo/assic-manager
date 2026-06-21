@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { exigirAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { dataParaInputLocal } from "@/lib/formatadores";
+import { pixManualSchema } from "@/lib/validations";
 
 export const metadata: Metadata = { title: "Editar evento — Admin" };
 
@@ -31,6 +32,11 @@ export default async function EditarEventoPage({ params }: Props) {
   const publicar = publicarEventoAction.bind(null, evento.id);
   const encerrar = encerrarEventoAction.bind(null, evento.id);
   const cancelar = cancelarEventoAction.bind(null, evento.id);
+
+  // Lê o PIX manual de forma segura: JSON corrompido não vira "" silencioso
+  // que sobrescreveria os dados no próximo salvar.
+  const pix = pixManualSchema.safeParse(evento.pixManual);
+  const pixManual = pix.success ? pix.data : null;
 
   return (
     <div>
@@ -86,17 +92,10 @@ export default async function EditarEventoPage({ params }: Props) {
               .replace(".", ","),
             vagas: evento.vagas?.toString() ?? "",
             modalidadePagamento: evento.modalidadePagamento,
-            pixChave:
-              (evento.pixManual as { chave?: string } | null)?.chave ?? "",
-            pixTipoChave:
-              (evento.pixManual as { tipoChave?: string } | null)?.tipoChave ??
-              "",
-            pixBeneficiario:
-              (evento.pixManual as { beneficiario?: string } | null)
-                ?.beneficiario ?? "",
-            pixInstrucoes:
-              (evento.pixManual as { instrucoes?: string } | null)
-                ?.instrucoes ?? "",
+            pixChave: pixManual?.chave ?? "",
+            pixTipoChave: pixManual?.tipoChave ?? "",
+            pixBeneficiario: pixManual?.beneficiario ?? "",
+            pixInstrucoes: pixManual?.instrucoes ?? "",
           }}
         />
       </div>
