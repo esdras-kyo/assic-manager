@@ -232,24 +232,28 @@ async function main() {
   conteudoSchema.parse(conteudo);
   camposPersonalizadosSchema.parse(camposPersonalizados);
 
+  const dadosAssic = {
+    slug: "assic-2026",
+    nome: "Atualização Ministerial Regional ASSIC 2026",
+    descricao: "Atualizando para Crescer",
+    local:
+      "Igreja de Cristo Maranata — Avenida Abel Coimbra, Qd. 86, Lt. 09, Cidade Jardim, Goiânia/GO",
+    dataInicio: new Date("2026-08-07T19:30:00-03:00"),
+    dataFim: new Date("2026-08-08T19:00:00-03:00"),
+    precoEmCentavos: 3500,
+    status: "ABERTO" as const,
+    modalidadePagamento: "MANUAL" as const,
+    pixManual,
+    conteudo,
+    camposPersonalizados,
+  };
+
+  // update com os mesmos dados: re-rodar o seed REFRESCA o evento (conteúdo,
+  // imagens, campos). update:{} deixaria mudanças sem efeito em evento existente.
   const assic = await prisma.evento.upsert({
     where: { slug: "assic-2026" },
-    update: {},
-    create: {
-      slug: "assic-2026",
-      nome: "Atualização Ministerial Regional ASSIC 2026",
-      descricao: "Atualizando para Crescer",
-      local:
-        "Igreja de Cristo Maranata — Avenida Abel Coimbra, Qd. 86, Lt. 09, Cidade Jardim, Goiânia/GO",
-      dataInicio: new Date("2026-08-07T19:30:00-03:00"),
-      dataFim: new Date("2026-08-08T19:00:00-03:00"),
-      precoEmCentavos: 3500,
-      status: "ABERTO",
-      modalidadePagamento: "MANUAL",
-      pixManual,
-      conteudo,
-      camposPersonalizados,
-    },
+    update: dadosAssic,
+    create: dadosAssic,
   });
 
   console.info(`Seed ok: evento "${assic.nome}" (${assic.status})`);
