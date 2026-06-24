@@ -51,15 +51,15 @@ async function main() {
   };
 
   const conteudo = {
-    // URLs de TESTE (picsum, com seed p/ serem estáveis). Trocar pelas imagens
-    // reais do evento depois — capa ~1600x872.
-    imagemCapa: "https://picsum.photos/seed/assic2026-capa/1600/872",
+    // Imagens reais do evento (R2 via worker). Capa = "capa-atualizac_ao".
+    imagemCapa:
+      "https://worker-1.esdrascamel.workers.dev/8949d12c-b0b0-4557-8ae4-97d01264689d-capa-atualizac_ao.jpeg",
     galeria: [
-      "https://picsum.photos/seed/assic2026-1/800/600",
-      "https://picsum.photos/seed/assic2026-2/800/600",
-      "https://picsum.photos/seed/assic2026-3/800/600",
-      "https://picsum.photos/seed/assic2026-4/800/600",
-      "https://picsum.photos/seed/assic2026-5/800/600",
+      "https://worker-1.esdrascamel.workers.dev/181968d7-a1a0-4174-9659-924d47c720e6-assicgo_1753092868740.jpeg",
+      "https://worker-1.esdrascamel.workers.dev/9b596bba-1ba5-4d5b-b866-61b7cde76acb-assicgo_1753092874363.jpeg",
+      "https://worker-1.esdrascamel.workers.dev/c6cf7fc1-f0b9-4204-85a8-fa6a691ecedd-assicgo_1753092877917.jpeg",
+      "https://worker-1.esdrascamel.workers.dev/aaadf9d6-1f15-4ef4-839a-e7ad30182be8-assicgo_1753092906012.jpeg",
+      "https://worker-1.esdrascamel.workers.dev/ee6b3b5f-0d74-4d28-8dd6-adbed634b79a-IMG_2733.JPG",
     ],
     subtitulo: "Atualizando para Crescer",
     destaques: [
