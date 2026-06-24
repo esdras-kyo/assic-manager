@@ -1,3 +1,4 @@
+import { ImagemEvento } from "@/components/eventos/imagem-evento";
 import type { Conteudo } from "@/lib/validations";
 
 /** Destaca, em um texto, as palavras/expressões listadas em `destaques`. */
@@ -33,6 +34,22 @@ export function LandingEvento({ conteudo }: { conteudo: Conteudo }) {
             <p key={i}>{comDestaques(p, conteudo.destaques)}</p>
           ))}
         </div>
+      ) : null}
+
+      {conteudo.galeria?.length ? (
+        <section aria-label="Galeria de fotos">
+          {/* faixa rolável (scroll-snap CSS, sem JS) — simples e acessível */}
+          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
+            {conteudo.galeria.map((url, i) => (
+              <ImagemEvento
+                key={url}
+                src={url}
+                alt={`Foto ${i + 1} do evento`}
+                className="aspect-[4/3] w-72 shrink-0 snap-start rounded-xl ring-1 ring-border sm:w-80"
+              />
+            ))}
+          </div>
+        </section>
       ) : null}
 
       {conteudo.horarios?.length ? (

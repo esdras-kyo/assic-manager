@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ImagemEvento } from "@/components/eventos/imagem-evento";
 import { LandingEvento } from "@/components/eventos/landing-evento";
 import { formatarDataExtensa, formatarPrecoBRL } from "@/lib/formatadores";
 import type { Conteudo } from "@/lib/validations";
@@ -34,6 +35,8 @@ export default async function EventoPage({ params }: Props) {
   // Rascunho não é público.
   if (!evento || evento.status === "RASCUNHO") notFound();
 
+  const conteudo = evento.conteudo as Conteudo | null;
+
   const encerrado =
     evento.status === "ENCERRADO" || evento.status === "CANCELADO";
 
@@ -47,6 +50,22 @@ export default async function EventoPage({ params }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+      {conteudo?.imagemCapa && (
+        <div className="relative mb-10">
+          {/* glow azul sutil atrás da capa */}
+          <div
+            aria-hidden
+            className="absolute -inset-3 -z-10 rounded-[2rem] bg-primary/10 blur-2xl"
+          />
+          <ImagemEvento
+            src={conteudo.imagemCapa}
+            alt={`Capa do evento ${evento.nome}`}
+            eager
+            className="aspect-[1600/872] w-full rounded-2xl shadow-sm ring-1 ring-primary/15"
+          />
+        </div>
+      )}
+
       <p className="font-semibold tracking-wide text-primary uppercase">
         Evento
       </p>
@@ -95,9 +114,9 @@ export default async function EventoPage({ params }: Props) {
         )}
       </dl>
 
-      {evento.conteudo ? (
+      {conteudo ? (
         <div className="mt-10">
-          <LandingEvento conteudo={evento.conteudo as Conteudo} />
+          <LandingEvento conteudo={conteudo} />
         </div>
       ) : (
         evento.descricao && (

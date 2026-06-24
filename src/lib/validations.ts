@@ -199,6 +199,10 @@ export function construirSchemaCampos(campos: CampoPersonalizado[]) {
 // --- Conteúdo estruturado da landing ---
 
 export const conteudoSchema = z.object({
+  // Imagens do evento (URLs). Upload virá depois; por ora a URL é setada no
+  // seed/config. imagemCapa (~1600x872) é o destaque em todas as etapas.
+  imagemCapa: z.string().optional(),
+  galeria: z.array(z.string()).optional(),
   subtitulo: z.string().optional(),
   apresentacao: z.array(z.string()).optional(),
   destaques: z.array(z.string()).optional(),

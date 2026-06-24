@@ -51,6 +51,16 @@ async function main() {
   };
 
   const conteudo = {
+    // URLs de TESTE (picsum, com seed p/ serem estáveis). Trocar pelas imagens
+    // reais do evento depois — capa ~1600x872.
+    imagemCapa: "https://picsum.photos/seed/assic2026-capa/1600/872",
+    galeria: [
+      "https://picsum.photos/seed/assic2026-1/800/600",
+      "https://picsum.photos/seed/assic2026-2/800/600",
+      "https://picsum.photos/seed/assic2026-3/800/600",
+      "https://picsum.photos/seed/assic2026-4/800/600",
+      "https://picsum.photos/seed/assic2026-5/800/600",
+    ],
     subtitulo: "Atualizando para Crescer",
     destaques: [
       "Atualizando para Crescer",
