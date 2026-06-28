@@ -58,7 +58,10 @@ export default async function PagamentoPage({ params }: Props) {
         </div>
         <div className="mt-10">
           {pix ? (
-            <PixManualPainel pix={pix} />
+            <PixManualPainel
+              pix={pix}
+              amount={inscricao.evento.precoEmCentavos / 100}
+            />
           ) : (
             <p className="text-lg text-muted-foreground">
               A chave PIX deste evento ainda não foi configurada. Fale com a
