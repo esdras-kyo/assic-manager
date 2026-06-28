@@ -31,8 +31,7 @@ export const metadata: Metadata = {
     default: "assic — eventos e inscrições",
     template: "%s · assic",
   },
-  description:
-    "Inscreva-se nos próximos eventos de forma simples e segura, direto do seu celular.",
+  description: "Inscreva-se nos próximos eventos de forma simples.",
 };
 
 export default function RootLayout({

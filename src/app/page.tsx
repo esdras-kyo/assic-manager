@@ -37,12 +37,10 @@ export default function Home() {
         />
         <div className="relative mx-auto w-full max-w-5xl px-4 py-20 sm:px-6 sm:py-28">
           <h1 className="max-w-2xl text-5xl leading-[1.1] font-semibold tracking-tight text-foreground sm:text-6xl">
-            Encontros que <span className="text-primary">aproximam</span>{" "}
-            pessoas.
+            Eventos mais que <span className="text-primary">especiais.</span>
           </h1>
           <p className="mt-6 max-w-xl text-xl leading-relaxed text-muted-foreground">
-            Inscreva-se nos próximos eventos de forma simples e segura — direto
-            do seu celular, sem complicação.
+            Inscreva-se nos próximos eventos de forma simples.
           </p>
           <div className="mt-10">
             <Button asChild size="lg" className="h-14 px-8 text-lg">
