@@ -49,113 +49,118 @@ export default async function EventoPage({ params }: Props) {
   const podeInscrever = !encerrado && !esgotado;
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+      {/* -mx-4 sm:mx-0: capa full-bleed (parede a parede) no mobile; hero contido no desktop. */}
       {conteudo?.imagemCapa && (
-        <div className="relative mb-10">
-          {/* glow azul sutil atrás da capa */}
+        <div className="relative -mx-4 mb-10 sm:mx-0">
+          {/* glow azul sutil atrás da capa (só desktop; no mobile a capa sangra até a borda) */}
           <div
             aria-hidden
-            className="absolute -inset-3 -z-10 rounded-[2rem] bg-primary/10 blur-2xl"
+            className="absolute -inset-3 -z-10 hidden rounded-[2rem] bg-primary/10 blur-2xl sm:block"
           />
           <ImagemEvento
             src={conteudo.imagemCapa}
             alt={`Capa do evento ${evento.nome}`}
             eager
-            className="aspect-[1600/872] w-full rounded-2xl shadow-sm ring-1 ring-primary/15"
+            className="aspect-[1600/872] w-full rounded-none shadow-sm ring-0 sm:rounded-2xl sm:ring-1 sm:ring-primary/15"
           />
         </div>
       )}
 
-      <p className="font-semibold tracking-wide text-primary uppercase">
-        Evento
-      </p>
-      <h1 className="mt-2 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
-        {evento.nome}
-      </h1>
+      {/* Coluna de leitura mais estreita que a capa: conforto de leitura
+          (público idoso), enquanto a capa hero ocupa a largura cheia. */}
+      <div className="mx-auto max-w-3xl">
+        <p className="font-semibold tracking-wide text-primary uppercase">
+          Evento
+        </p>
+        <h1 className="mt-2 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
+          {evento.nome}
+        </h1>
 
-      <dl className="mt-8 space-y-4 text-lg">
-        <div className="flex items-start gap-4">
-          <dt className="mt-0.5">
-            <CalendarDays aria-hidden className="size-6 text-primary" />
-            <span className="sr-only">Data</span>
-          </dt>
-          <dd className="first-letter:uppercase">
-            {formatarDataExtensa(evento.dataInicio)}
-          </dd>
-        </div>
-        <div className="flex items-start gap-4">
-          <dt className="mt-0.5">
-            <MapPin aria-hidden className="size-6 text-primary" />
-            <span className="sr-only">Local</span>
-          </dt>
-          <dd>{evento.local}</dd>
-        </div>
-        <div className="flex items-start gap-4">
-          <dt className="mt-0.5">
-            <Ticket aria-hidden className="size-6 text-primary" />
-            <span className="sr-only">Valor</span>
-          </dt>
-          <dd className="font-bold">
-            {formatarPrecoBRL(evento.precoEmCentavos)}
-          </dd>
-        </div>
-        {vagasRestantes !== null && vagasRestantes > 0 && (
+        <dl className="mt-8 space-y-4 text-lg">
           <div className="flex items-start gap-4">
             <dt className="mt-0.5">
-              <Users aria-hidden className="size-6 text-primary" />
-              <span className="sr-only">Vagas</span>
+              <CalendarDays aria-hidden className="size-6 text-primary" />
+              <span className="sr-only">Data</span>
             </dt>
-            <dd>
-              {vagasRestantes === 1
-                ? "Última vaga!"
-                : `${vagasRestantes} vagas restantes`}
+            <dd className="first-letter:uppercase">
+              {formatarDataExtensa(evento.dataInicio)}
             </dd>
           </div>
-        )}
-      </dl>
-
-      {conteudo ? (
-        <div className="mt-10">
-          <LandingEvento conteudo={conteudo} />
-        </div>
-      ) : (
-        evento.descricao && (
-          <p className="mt-8 text-lg leading-relaxed whitespace-pre-line text-muted-foreground">
-            {evento.descricao}
-          </p>
-        )
-      )}
-
-      <div className="mt-10">
-        {podeInscrever ? (
-          <Button
-            asChild
-            size="lg"
-            className="h-14 w-full text-lg sm:w-auto sm:px-10"
-          >
-            <Link href={`/eventos/${evento.slug}/inscricao`}>
-              Quero me inscrever
-              <ArrowRight aria-hidden className="size-5" />
-            </Link>
-          </Button>
-        ) : (
-          <div
-            role="status"
-            className="flex items-start gap-3 rounded-xl border border-border bg-secondary p-5 text-lg"
-          >
-            <CircleAlert
-              aria-hidden
-              className="mt-0.5 size-6 shrink-0 text-muted-foreground"
-            />
-            <p>
-              {evento.status === "CANCELADO"
-                ? "Este evento foi cancelado."
-                : esgotado
-                  ? "As vagas deste evento já foram preenchidas."
-                  : "As inscrições deste evento já foram encerradas."}
-            </p>
+          <div className="flex items-start gap-4">
+            <dt className="mt-0.5">
+              <MapPin aria-hidden className="size-6 text-primary" />
+              <span className="sr-only">Local</span>
+            </dt>
+            <dd>{evento.local}</dd>
           </div>
+          <div className="flex items-start gap-4">
+            <dt className="mt-0.5">
+              <Ticket aria-hidden className="size-6 text-primary" />
+              <span className="sr-only">Valor</span>
+            </dt>
+            <dd className="font-bold">
+              {formatarPrecoBRL(evento.precoEmCentavos)}
+            </dd>
+          </div>
+          {vagasRestantes !== null && vagasRestantes > 0 && (
+            <div className="flex items-start gap-4">
+              <dt className="mt-0.5">
+                <Users aria-hidden className="size-6 text-primary" />
+                <span className="sr-only">Vagas</span>
+              </dt>
+              <dd>
+                {vagasRestantes === 1
+                  ? "Última vaga!"
+                  : `${vagasRestantes} vagas restantes`}
+              </dd>
+            </div>
+          )}
+        </dl>
+
+        {conteudo ? (
+          <div className="mt-10">
+            <LandingEvento conteudo={conteudo} />
+          </div>
+        ) : (
+          evento.descricao && (
+            <p className="mt-8 text-lg leading-relaxed whitespace-pre-line text-muted-foreground">
+              {evento.descricao}
+            </p>
+          )
         )}
+
+        <div className="mt-10">
+          {podeInscrever ? (
+            <Button
+              asChild
+              size="lg"
+              className="h-14 w-full text-lg sm:w-auto sm:px-10"
+            >
+              <Link href={`/eventos/${evento.slug}/inscricao`}>
+                Quero me inscrever
+                <ArrowRight aria-hidden className="size-5" />
+              </Link>
+            </Button>
+          ) : (
+            <div
+              role="status"
+              className="flex items-start gap-3 rounded-xl border border-border bg-secondary p-5 text-lg"
+            >
+              <CircleAlert
+                aria-hidden
+                className="mt-0.5 size-6 shrink-0 text-muted-foreground"
+              />
+              <p>
+                {evento.status === "CANCELADO"
+                  ? "Este evento foi cancelado."
+                  : esgotado
+                    ? "As vagas deste evento já foram preenchidas."
+                    : "As inscrições deste evento já foram encerradas."}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
