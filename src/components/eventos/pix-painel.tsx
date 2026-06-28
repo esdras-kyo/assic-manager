@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Copy, LoaderCircle } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
 
@@ -73,10 +74,26 @@ export function PixPainel({
 
   return (
     <div className="space-y-8">
-      {/* Código copia-e-cola */}
+      {/* QR Code: escaneável pela câmera do app do banco */}
       <div>
-        <p className="text-lg font-bold">Código Pix copia e cola</p>
-        <code className="mt-2 block max-h-32 overflow-y-auto rounded-xl border border-border bg-secondary p-4 font-mono text-base break-all select-all">
+        <p className="text-lg font-bold">Aponte a câmera do app do seu banco</p>
+        <div className="mt-3 flex justify-center">
+          <div className="rounded-2xl border border-border bg-white p-4">
+            <QRCodeSVG
+              value={qrCode}
+              size={232}
+              marginSize={0}
+              title="QR Code para pagamento via Pix"
+              className="h-auto w-full max-w-[232px]"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Código copia-e-cola (alternativa ao QR) */}
+      <div>
+        <p className="text-lg font-bold">Ou copie o código Pix</p>
+        <code className="mt-2 block max-h-28 overflow-y-auto rounded-xl border border-border bg-secondary p-3 font-mono text-xs break-all select-all">
           {qrCode}
         </code>
         <Button
