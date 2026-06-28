@@ -220,7 +220,9 @@ async function main() {
     dataFim: new Date("2026-08-08T19:00:00-03:00"),
     precoEmCentavos: 3500,
     status: "ABERTO" as const,
-    modalidadePagamento: "MANUAL" as const,
+    // Pix automático via Mercado Pago (gateway). pixManual fica como
+    // registro do beneficiário; não é usado no modo GATEWAY.
+    modalidadePagamento: "GATEWAY" as const,
     pixManual,
     conteudo,
     camposPersonalizados,
