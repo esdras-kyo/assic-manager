@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { processarWebhook } from "@/services/pagamento.service";
-import { AssinaturaInvalidaError } from "@/services/payment/gateways/fake.gateway";
+import { AssinaturaInvalidaError } from "@/services/payment/errors";
 
 // Rota fina (planoassic §2.1): recebe, repassa ao service, responde.
 // A ÚNICA porta de confirmação de inscrição é este webhook (§4.5.2).

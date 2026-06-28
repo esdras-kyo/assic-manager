@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { AssinaturaInvalidaError } from "@/services/payment/errors";
 import type {
   CreatePaymentInput,
   CreatePaymentResult,
@@ -11,12 +12,8 @@ import type {
 // Gateway falso para desenvolvimento (planoassic §4.3): destrava o fluxo
 // completo sem gateway contratado. Estado vive em memória — só dev local.
 
-export class AssinaturaInvalidaError extends Error {
-  constructor() {
-    super("Assinatura do webhook inválida");
-    this.name = "AssinaturaInvalidaError";
-  }
-}
+// Reexporta para não quebrar imports antigos (`from ".../fake.gateway"`).
+export { AssinaturaInvalidaError };
 
 // O fake tem nomenclatura própria de status de propósito: exercita a
 // tradução status-bruto → status-normalizado que todo adapter real fará.

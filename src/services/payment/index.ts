@@ -1,5 +1,6 @@
 import { getEnv } from "@/lib/env";
 import { FakeGateway } from "@/services/payment/gateways/fake.gateway";
+import { MercadoPagoGateway } from "@/services/payment/gateways/mercadopago.gateway";
 import type { PaymentGateway } from "@/services/payment/types";
 
 // Fábrica (planoassic §4.4): trocar de gateway = mudar PAYMENT_PROVIDER.
@@ -12,8 +13,13 @@ export function getPaymentGateway(): PaymentGateway {
 
   const env = getEnv();
   switch (env.PAYMENT_PROVIDER) {
-    case "pagarme":
     case "mercadopago":
+      instancia = new MercadoPagoGateway(
+        env.MERCADOPAGO_ACCESS_TOKEN,
+        env.MERCADOPAGO_WEBHOOK_SECRET,
+      );
+      return instancia;
+    case "pagarme":
       throw new Error(
         `Gateway "${env.PAYMENT_PROVIDER}" ainda não implementado (Etapa 5)`,
       );

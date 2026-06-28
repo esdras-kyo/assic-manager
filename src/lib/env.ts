@@ -13,6 +13,10 @@ const envSchema = z.object({
     .default("fake"),
   // Assinatura do webhook do FakeGateway — só desenvolvimento.
   FAKE_WEBHOOK_SECRET: z.string().min(1).default("fake-dev-secret"),
+  // Mercado Pago — exigidas só quando PAYMENT_PROVIDER=mercadopago.
+  // (Validação efetiva acontece no construtor do gateway.)
+  MERCADOPAGO_ACCESS_TOKEN: z.string().optional(),
+  MERCADOPAGO_WEBHOOK_SECRET: z.string().optional(),
   EMAIL_PROVIDER: z
     .enum(["console", "resend"], {
       error: "EMAIL_PROVIDER deve ser console ou resend",
