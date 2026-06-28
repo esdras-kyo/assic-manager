@@ -8,24 +8,12 @@ export function normalizarDigitos(valor: string): string {
   return valor.replace(/\D/g, "");
 }
 
-/** Valida CPF pelos dígitos verificadores. Aceita com ou sem máscara. */
-export function cpfValido(cpf: string): boolean {
-  const digitos = normalizarDigitos(cpf);
-  if (digitos.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(digitos)) return false; // todos iguais
-
-  const calcularDv = (tamanho: number): number => {
-    let soma = 0;
-    for (let i = 0; i < tamanho; i++) {
-      soma += Number(digitos[i]) * (tamanho + 1 - i);
-    }
-    return ((soma * 10) % 11) % 10;
-  };
-
-  return (
-    calcularDv(9) === Number(digitos[9]) &&
-    calcularDv(10) === Number(digitos[10])
-  );
+/**
+ * CPF "completo": exige só os 11 dígitos (com ou sem máscara). NÃO valida os
+ * dígitos verificadores — CPF fake é aceito, basta ter os 11 números.
+ */
+export function cpfCompleto(cpf: string): boolean {
+  return normalizarDigitos(cpf).length === 11;
 }
 
 /** Celular BR: DDD (2 dígitos) + 9 + 8 dígitos = 11 dígitos. */
@@ -52,10 +40,10 @@ export const inscricaoCreateSchema = z.object({
     .string()
     .trim()
     .optional()
-    .refine((v) => !v || cpfValido(v), {
-      error: "CPF inválido. Confira os números digitados",
-    })
-    .transform((v) => (v ? normalizarDigitos(v) : undefined)),
+    .transform((v) => (v ? normalizarDigitos(v) : undefined))
+    .refine((v) => !v || v.length === 11, {
+      error: "CPF precisa ter os 11 números",
+    }),
   camposExtras: z.record(z.string(), z.unknown()).optional(),
 });
 

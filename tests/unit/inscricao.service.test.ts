@@ -100,7 +100,7 @@ describe("criarInscricao", () => {
 
   it("rejeita input inválido sem tocar o banco", async () => {
     await expect(
-      criarInscricao({ ...inscricaoValida, documento: "111.111.111-11" }),
+      criarInscricao({ ...inscricaoValida, documento: "111" }),
     ).rejects.toThrow();
     expect(mocked.evento.findUnique).not.toHaveBeenCalled();
   });

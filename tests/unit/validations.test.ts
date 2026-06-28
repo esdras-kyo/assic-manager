@@ -1,27 +1,24 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  cpfValido,
+  cpfCompleto,
   eventoCreateSchema,
   inscricaoCreateSchema,
   normalizarDigitos,
 } from "@/lib/validations";
 
-describe("cpfValido", () => {
-  it("aceita CPF válido sem máscara", () => {
-    expect(cpfValido("52998224725")).toBe(true);
+describe("cpfCompleto", () => {
+  it("aceita 11 dígitos sem máscara", () => {
+    expect(cpfCompleto("52998224725")).toBe(true);
   });
 
-  it("rejeita dígito verificador errado", () => {
-    expect(cpfValido("52998224724")).toBe(false);
-  });
-
-  it("rejeita CPF com todos os dígitos iguais", () => {
-    expect(cpfValido("11111111111")).toBe(false);
+  it("aceita fake com 11 dígitos (não valida DV)", () => {
+    expect(cpfCompleto("11111111111")).toBe(true);
+    expect(cpfCompleto("52998224724")).toBe(true);
   });
 
   it("rejeita tamanho errado", () => {
-    expect(cpfValido("1234567890")).toBe(false);
+    expect(cpfCompleto("1234567890")).toBe(false);
   });
 });
 
@@ -47,10 +44,10 @@ describe("inscricaoCreateSchema", () => {
     expect(r.documento).toBe("52998224725");
   });
 
-  it("rejeita CPF inválido com mensagem em PT", () => {
+  it("rejeita CPF com menos de 11 dígitos, com mensagem em PT", () => {
     const r = inscricaoCreateSchema.safeParse({
       ...valida,
-      documento: "111.111.111-11",
+      documento: "529.982.247",
     });
     expect(r.success).toBe(false);
     if (!r.success) {
@@ -94,12 +91,13 @@ describe("inscricaoCreateSchema", () => {
     expect(r.success).toBe(true);
   });
 
-  it("ainda rejeita CPF inválido quando enviado", () => {
+  it("aceita CPF fake com 11 dígitos (sem validar DV)", () => {
     const r = inscricaoCreateSchema.safeParse({
       ...valida,
       documento: "111.111.111-11",
     });
-    expect(r.success).toBe(false);
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.documento).toBe("11111111111");
   });
 });
 
