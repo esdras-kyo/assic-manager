@@ -22,6 +22,10 @@ const envSchema = z.object({
       error: "EMAIL_PROVIDER deve ser console ou resend",
     })
     .default("console"),
+  // Resend — exigidas só quando EMAIL_PROVIDER=resend (validadas no sender).
+  RESEND_API_KEY: z.string().optional(),
+  // Remetente verificado, ex.: "ASSIC <nao-responda@marketingamesa.com.br>".
+  EMAIL_FROM: z.string().optional(),
   // Assina o cookie de sessão do admin. Gerar com: openssl rand -base64 32
   AUTH_SECRET: z
     .string({ error: "AUTH_SECRET é obrigatória" })

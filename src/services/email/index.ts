@@ -1,5 +1,6 @@
 import { getEnv } from "@/lib/env";
 import { ConsoleEmailSender } from "@/services/email/senders/console.sender";
+import { ResendEmailSender } from "@/services/email/senders/resend.sender";
 import type { EmailSender } from "@/services/email/types";
 
 let instancia: EmailSender | undefined;
@@ -10,7 +11,8 @@ export function getEmailSender(): EmailSender {
   const env = getEnv();
   switch (env.EMAIL_PROVIDER) {
     case "resend":
-      throw new Error('Sender "resend" ainda não implementado (sem API key)');
+      instancia = new ResendEmailSender(env.RESEND_API_KEY, env.EMAIL_FROM);
+      return instancia;
     case "console":
     default:
       instancia = new ConsoleEmailSender();
