@@ -4,7 +4,10 @@
 export interface EmailMessage {
   to: string;
   subject: string;
+  /** Versão texto puro (fallback e clientes sem HTML). */
   text: string;
+  /** Versão HTML opcional — quando presente, clientes a preferem. */
+  html?: string;
 }
 
 export interface EmailSender {

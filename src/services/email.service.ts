@@ -1,4 +1,8 @@
 import { getEmailSender } from "@/services/email";
+import {
+  montarHtmlConfirmacao,
+  montarTextoConfirmacao,
+} from "@/services/email/templates";
 
 const formatadorData = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "full",
@@ -21,21 +25,17 @@ export interface ConfirmacaoInscricaoDados {
 export async function enviarConfirmacaoInscricao(
   dados: ConfirmacaoInscricaoDados,
 ): Promise<void> {
-  const primeiroNome = dados.nome.split(" ")[0];
-  const quando = formatadorData.format(dados.eventoDataInicio);
+  const conteudo = {
+    primeiroNome: dados.nome.split(" ")[0],
+    eventoNome: dados.eventoNome,
+    eventoLocal: dados.eventoLocal,
+    quando: formatadorData.format(dados.eventoDataInicio),
+  };
 
   await getEmailSender().send({
     to: dados.email,
     subject: `Inscrição confirmada — ${dados.eventoNome}`,
-    text: [
-      `Olá, ${primeiroNome}!`,
-      "",
-      `Sua inscrição no evento "${dados.eventoNome}" está confirmada. 🎉`,
-      "",
-      `📅 Quando: ${quando}`,
-      `📍 Onde: ${dados.eventoLocal}`,
-      "",
-      "Guarde este email. Até lá!",
-    ].join("\n"),
+    text: montarTextoConfirmacao(conteudo),
+    html: montarHtmlConfirmacao(conteudo),
   });
 }
