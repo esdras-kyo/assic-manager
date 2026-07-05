@@ -155,4 +155,15 @@ describe("eventoCreateSchema", () => {
       true,
     );
   });
+
+  it("aceita inclui opcional e faz trim", () => {
+    const r = eventoCreateSchema.parse({
+      ...valido,
+      inclui: "  café da manhã, material de apoio  ",
+    });
+    expect(r.inclui).toBe("café da manhã, material de apoio");
+
+    const semCampo = eventoCreateSchema.parse(valido);
+    expect(semCampo.inclui).toBeUndefined();
+  });
 });

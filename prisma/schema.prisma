@@ -12,6 +12,7 @@ model Evento {
   slug            String       @unique
   nome            String
   descricao       String?
+  inclui          String?
   local           String
   dataInicio      DateTime
   dataFim         DateTime?

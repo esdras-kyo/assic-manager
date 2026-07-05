@@ -69,6 +69,7 @@ const eventoBaseSchema = z.object({
       error: "Slug deve ter só letras minúsculas, números e hífens",
     }),
   descricao: z.string().trim().optional(),
+  inclui: z.string().trim().optional(),
   local: z
     .string({ error: "Local é obrigatório" })
     .trim()

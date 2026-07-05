@@ -47,6 +47,7 @@ const eventoAberto = {
   slug: "encontro",
   nome: "Encontro",
   descricao: null,
+  inclui: null,
   local: "Salão",
   dataInicio: new Date("2026-07-10T19:00:00.000Z"),
   dataFim: null,

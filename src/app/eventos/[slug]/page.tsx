@@ -99,8 +99,15 @@ export default async function EventoPage({ params }: Props) {
               <Ticket aria-hidden className="size-6 text-primary" />
               <span className="sr-only">Valor</span>
             </dt>
-            <dd className="font-bold">
-              {formatarPrecoBRL(evento.precoEmCentavos)}
+            <dd>
+              <span className="font-bold">
+                {formatarPrecoBRL(evento.precoEmCentavos)}
+              </span>
+              {evento.inclui && (
+                <span className="mt-1 block text-sm font-normal text-muted-foreground">
+                  {evento.inclui}
+                </span>
+              )}
             </dd>
           </div>
           {vagasRestantes !== null && vagasRestantes > 0 && (

@@ -41,6 +41,7 @@ const eventoDb = {
   slug: "encontro-de-junho",
   nome: "Encontro de Junho",
   descricao: null,
+  inclui: null,
   local: "Salão Principal",
   dataInicio: new Date("2026-07-10T19:00:00.000Z"),
   dataFim: null,

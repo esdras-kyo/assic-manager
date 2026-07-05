@@ -55,6 +55,11 @@ export default async function InscricaoPage({ params }: Props) {
           <p className="mt-1 text-lg font-bold text-primary">
             {formatarPrecoBRL(evento.precoEmCentavos)}
           </p>
+          {evento.inclui && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {evento.inclui}
+            </p>
+          )}
         </div>
       </div>
 

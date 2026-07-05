@@ -84,6 +84,7 @@ export default async function EditarEventoPage({ params }: Props) {
             nome: evento.nome,
             slug: evento.slug,
             descricao: evento.descricao ?? "",
+            inclui: evento.inclui ?? "",
             local: evento.local,
             dataInicio: dataParaInputLocal(evento.dataInicio),
             dataFim: evento.dataFim ? dataParaInputLocal(evento.dataFim) : "",

@@ -19,6 +19,7 @@ export interface EventoFormValores {
   nome?: string;
   slug?: string;
   descricao?: string;
+  inclui?: string;
   local?: string;
   dataInicio?: string; // datetime-local (horário SP)
   dataFim?: string;
@@ -137,6 +138,20 @@ export function FormEvento({ inicial }: { inicial?: EventoFormValores }) {
           rows={4}
           defaultValue={valores?.descricao}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="inclui">O que inclui (opcional)</Label>
+        <Textarea
+          id="inclui"
+          name="inclui"
+          rows={2}
+          placeholder="ex: café da manhã, material de apoio"
+          defaultValue={valores?.inclui}
+        />
+        <p className="text-sm text-muted-foreground">
+          Aparece em cinza, abaixo do preço, na página do evento e na inscrição.
+        </p>
       </div>
 
       <div className="space-y-2">
