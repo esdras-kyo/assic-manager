@@ -62,7 +62,9 @@ export default async function SucessoPage({ params }: Props) {
         </div>
 
         <p className="mt-6 text-lg text-muted-foreground">
-          Enviamos a confirmação para <strong>{inscricao.email}</strong>.
+          Enviamos a confirmação para <strong>{inscricao.email}</strong>. Não
+          encontrou? Confira a caixa de <strong>spam</strong> ou lixo
+          eletrônico.
         </p>
 
         <Button

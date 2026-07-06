@@ -38,6 +38,10 @@ export default async function PendentePage({ params }: Props) {
         Isso pode levar alguns instantes. Você pode voltar à tela de pagamento
         para acompanhar — ela atualiza sozinha.
       </p>
+      <p className="mt-4 max-w-md text-lg text-muted-foreground">
+        Assim que confirmarmos, enviaremos um e-mail. Se não aparecer, confira a
+        caixa de <strong>spam</strong> ou lixo eletrônico.
+      </p>
       <Link
         href={`/pagamento/${inscricaoId}`}
         className="mt-10 text-lg font-semibold text-primary underline underline-offset-4"
