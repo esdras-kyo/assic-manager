@@ -1,4 +1,5 @@
 import { ImagemEvento } from "@/components/eventos/imagem-evento";
+import { formatarPrecoBRL } from "@/lib/formatadores";
 import type { Conteudo } from "@/lib/validations";
 
 /** Destaca, em um texto, as palavras/expressões listadas em `destaques`. */
@@ -19,7 +20,13 @@ function comDestaques(texto: string, destaques?: string[]) {
   );
 }
 
-export function LandingEvento({ conteudo }: { conteudo: Conteudo }) {
+export function LandingEvento({
+  conteudo,
+  precoEmCentavos,
+}: {
+  conteudo: Conteudo;
+  precoEmCentavos: number;
+}) {
   return (
     <div className="space-y-12">
       {conteudo.subtitulo && (
@@ -126,7 +133,7 @@ export function LandingEvento({ conteudo }: { conteudo: Conteudo }) {
         <section className="rounded-xl border border-border bg-secondary p-6">
           <h2 className="text-2xl font-semibold">Investimento</h2>
           <p className="mt-2 text-xl font-bold text-primary">
-            {conteudo.investimento.valorTexto}
+            {formatarPrecoBRL(precoEmCentavos)}
           </p>
           {conteudo.investimento.inclui && (
             <p className="mt-2 text-lg">{conteudo.investimento.inclui}</p>

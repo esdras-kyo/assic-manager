@@ -106,7 +106,6 @@ async function main() {
       },
     ],
     investimento: {
-      valorTexto: "R$ 35,00 por participante",
       inclui:
         "O valor inclui a participação em toda a programação do evento e os momentos de coffee-break.",
     },

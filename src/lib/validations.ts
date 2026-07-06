@@ -212,9 +212,7 @@ export const conteudoSchema = z.object({
       }),
     )
     .optional(),
-  investimento: z
-    .object({ valorTexto: z.string(), inclui: z.string().optional() })
-    .optional(),
+  investimento: z.object({ inclui: z.string().optional() }).optional(),
   textoFinal: z
     .object({
       titulo: z.string(),

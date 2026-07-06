@@ -127,7 +127,10 @@ export default async function EventoPage({ params }: Props) {
 
         {conteudo ? (
           <div className="mt-10">
-            <LandingEvento conteudo={conteudo} />
+            <LandingEvento
+              conteudo={conteudo}
+              precoEmCentavos={evento.precoEmCentavos}
+            />
           </div>
         ) : (
           evento.descricao && (
