@@ -64,6 +64,12 @@ export default async function EditarEventoPage({ params }: Props) {
         >
           editar conteúdo
         </Link>
+        <Link
+          href={`/admin/eventos/${evento.id}/programacao`}
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          editar programação
+        </Link>
       </div>
 
       {/* Ações de situação — condicionais à máquina de estados do evento */}

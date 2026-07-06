@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { montarConteudo, type EntradaConteudo } from "@/lib/conteudo";
+import {
+  montarConteudo,
+  mesclarProgramacao,
+  type EntradaConteudo,
+  type EntradaProgramacao,
+} from "@/lib/conteudo";
 import type { Conteudo } from "@/lib/validations";
 
 const vazia: EntradaConteudo = {
@@ -83,5 +88,86 @@ describe("montarConteudo", () => {
     expect(
       montarConteudo(null, { ...vazia, textoFinalTitulo: "só" }).textoFinal,
     ).toBeUndefined();
+  });
+});
+
+describe("mesclarProgramacao", () => {
+  const vaziaP: EntradaProgramacao = { horarios: [], programacao: [] };
+
+  it("preserva textos/imagens do atual", () => {
+    const atual: Conteudo = {
+      subtitulo: "sub",
+      apresentacao: ["p1"],
+      imagemCapa: "capa.jpg",
+      galeria: ["g.jpg"],
+    };
+    const r = mesclarProgramacao(atual, vaziaP);
+    expect(r.subtitulo).toBe("sub");
+    expect(r.apresentacao).toEqual(["p1"]);
+    expect(r.imagemCapa).toBe("capa.jpg");
+    expect(r.galeria).toEqual(["g.jpg"]);
+  });
+
+  it("horarios: descarta blocos vazios; dia sem nome ou sem blocos some", () => {
+    const r = mesclarProgramacao(null, {
+      horarios: [
+        { dia: "  Sábado  ", blocos: [" 9h ", "", "  "] },
+        { dia: "", blocos: ["10h"] },
+        { dia: "Domingo", blocos: ["", "  "] },
+      ],
+      programacao: [],
+    });
+    expect(r.horarios).toEqual([{ dia: "Sábado", blocos: ["9h"] }]);
+  });
+
+  it("horarios vazio → chave omitida", () => {
+    const r = mesclarProgramacao(
+      { horarios: [{ dia: "x", blocos: ["y"] }] },
+      vaziaP,
+    );
+    expect(r.horarios).toBeUndefined();
+    expect("horarios" in r).toBe(false);
+  });
+
+  it("programacao: limpa itens, período sem itens some, dia sem período/nome some, titulo vazio vira undefined", () => {
+    const r = mesclarProgramacao(null, {
+      horarios: [],
+      programacao: [
+        {
+          dia: " Dia 1 ",
+          periodos: [
+            { titulo: " Manhã ", itens: [" Abertura ", ""] },
+            { titulo: "", itens: ["Louvor"] },
+            { titulo: "Tarde", itens: ["", "  "] },
+          ],
+        },
+        { dia: "", periodos: [{ titulo: "x", itens: ["y"] }] },
+        { dia: "Dia 3", periodos: [{ titulo: "z", itens: [] }] },
+      ],
+    });
+    expect(r.programacao).toEqual([
+      {
+        dia: "Dia 1",
+        periodos: [
+          { titulo: "Manhã", itens: ["Abertura"] },
+          { itens: ["Louvor"] },
+        ],
+      },
+    ]);
+  });
+
+  it("substitui programacao antiga pela nova", () => {
+    const atual: Conteudo = {
+      programacao: [{ dia: "Velho", periodos: [{ itens: ["antigo"] }] }],
+    };
+    const r = mesclarProgramacao(atual, {
+      horarios: [],
+      programacao: [
+        { dia: "Novo", periodos: [{ titulo: "", itens: ["item"] }] },
+      ],
+    });
+    expect(r.programacao).toEqual([
+      { dia: "Novo", periodos: [{ itens: ["item"] }] },
+    ]);
   });
 });

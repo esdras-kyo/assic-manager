@@ -61,3 +61,56 @@ export function montarConteudo(
 
   return base;
 }
+
+export interface HorarioEntrada {
+  dia: string;
+  blocos: string[];
+}
+export interface PeriodoEntrada {
+  titulo: string;
+  itens: string[];
+}
+export interface DiaEntrada {
+  dia: string;
+  periodos: PeriodoEntrada[];
+}
+export interface EntradaProgramacao {
+  horarios: HorarioEntrada[];
+  programacao: DiaEntrada[];
+}
+
+/**
+ * Mescla programacao + horarios sobre o conteudo atual, preservando o resto
+ * (textos, imagens). Limpeza: descarta blocos/itens vazios; período sem itens,
+ * dia sem nome ou sem período/bloco são removidos; listas vazias → chave
+ * omitida.
+ */
+export function mesclarProgramacao(
+  atual: Conteudo | null,
+  e: EntradaProgramacao,
+): Conteudo {
+  const base: Conteudo = { ...(atual ?? {}) };
+
+  const horarios = e.horarios
+    .map((h) => ({ dia: h.dia.trim(), blocos: limparLista(h.blocos) }))
+    .filter((h) => h.dia && h.blocos.length > 0);
+  if (horarios.length) base.horarios = horarios;
+  else delete base.horarios;
+
+  const programacao = e.programacao
+    .map((d) => ({
+      dia: d.dia.trim(),
+      periodos: d.periodos
+        .map((p) => {
+          const titulo = p.titulo.trim();
+          const itens = limparLista(p.itens);
+          return titulo ? { titulo, itens } : { itens };
+        })
+        .filter((p) => p.itens.length > 0),
+    }))
+    .filter((d) => d.dia && d.periodos.length > 0);
+  if (programacao.length) base.programacao = programacao;
+  else delete base.programacao;
+
+  return base;
+}
