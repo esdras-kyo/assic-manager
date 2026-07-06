@@ -131,7 +131,7 @@ export default async function EventoPage({ params }: Props) {
           </div>
         ) : (
           evento.descricao && (
-            <p className="mt-8 text-lg leading-relaxed whitespace-pre-line text-muted-foreground">
+            <p className="mt-8 text-xl leading-relaxed whitespace-pre-line text-muted-foreground sm:text-2xl">
               {evento.descricao}
             </p>
           )
