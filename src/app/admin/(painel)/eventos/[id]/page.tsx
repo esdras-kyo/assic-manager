@@ -52,6 +52,12 @@ export default async function EditarEventoPage({ params }: Props) {
             <ExternalLink aria-hidden className="size-4" />
           </Link>
         )}
+        <Link
+          href={`/admin/eventos/${evento.id}/inscricoes`}
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          ver inscrições
+        </Link>
       </div>
 
       {/* Ações de situação — condicionais à máquina de estados do evento */}

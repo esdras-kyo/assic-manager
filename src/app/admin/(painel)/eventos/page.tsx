@@ -70,8 +70,13 @@ export default async function AdminEventosPage() {
                     {formatarPrecoBRL(evento.precoEmCentavos)}
                   </td>
                   <td className="px-4 py-3">
-                    {evento._count.inscricoes}
-                    {evento.vagas !== null && ` / ${evento.vagas}`}
+                    <Link
+                      href={`/admin/eventos/${evento.id}/inscricoes`}
+                      className="text-primary underline-offset-4 hover:underline"
+                    >
+                      {evento._count.inscricoes}
+                      {evento.vagas !== null && ` / ${evento.vagas}`}
+                    </Link>
                   </td>
                   <td className="px-4 py-3">
                     <BadgeStatus status={evento.status} />

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Download } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Download } from "lucide-react";
 
 import { TabelaInscricoes } from "@/components/admin/tabela-inscricoes";
 import { Button } from "@/components/ui/button";
@@ -7,7 +9,7 @@ import { exigirAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { InscricaoStatus } from "@/generated/prisma/client";
 
-export const metadata: Metadata = { title: "Inscrições — Admin" };
+export const metadata: Metadata = { title: "Inscrições do evento — Admin" };
 
 const STATUS_VALIDOS = [
   "PENDENTE",
@@ -17,41 +19,53 @@ const STATUS_VALIDOS = [
 ] as const;
 
 interface Props {
-  searchParams: Promise<{ evento?: string; status?: string }>;
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ status?: string }>;
 }
 
-export default async function AdminInscricoesPage({ searchParams }: Props) {
+export default async function InscricoesDoEventoPage({
+  params,
+  searchParams,
+}: Props) {
   await exigirAdmin();
-  const { evento: eventoId, status } = await searchParams;
+  const { id } = await params;
+  const { status } = await searchParams;
 
   const statusFiltro = STATUS_VALIDOS.includes(status as InscricaoStatus)
     ? (status as InscricaoStatus)
     : undefined;
 
-  const [eventos, inscricoes] = await Promise.all([
-    prisma.evento.findMany({ orderBy: { dataInicio: "desc" } }),
-    prisma.inscricao.findMany({
-      where: {
-        ...(eventoId && { eventoId }),
-        ...(statusFiltro && { status: statusFiltro }),
-      },
-      include: {
-        evento: { select: { nome: true, modalidadePagamento: true } },
-        pagamentos: { orderBy: { criadoEm: "desc" }, take: 1 },
-      },
-      orderBy: { criadoEm: "desc" },
-    }),
-  ]);
+  const evento = await prisma.evento.findUnique({ where: { id } });
+  if (!evento) notFound();
 
-  const csvParams = new URLSearchParams();
-  if (eventoId) csvParams.set("evento", eventoId);
+  const inscricoes = await prisma.inscricao.findMany({
+    where: {
+      eventoId: id,
+      ...(statusFiltro && { status: statusFiltro }),
+    },
+    include: {
+      evento: { select: { nome: true, modalidadePagamento: true } },
+      pagamentos: { orderBy: { criadoEm: "desc" }, take: 1 },
+    },
+    orderBy: { criadoEm: "desc" },
+  });
+
+  const csvParams = new URLSearchParams({ evento: id });
   if (statusFiltro) csvParams.set("status", statusFiltro);
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <Link
+        href={`/admin/eventos/${evento.id}`}
+        className="inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+      >
+        <ArrowLeft aria-hidden className="size-4" />
+        Voltar ao evento
+      </Link>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-semibold tracking-tight">
-          Inscrições{" "}
+          Inscrições — {evento.nome}{" "}
           <span className="text-xl text-muted-foreground">
             ({inscricoes.length})
           </span>
@@ -64,26 +78,7 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
         </Button>
       </div>
 
-      {/* Filtros via GET — URL compartilhável */}
       <form method="get" className="mt-6 flex flex-wrap items-end gap-4">
-        <div className="space-y-1.5">
-          <label htmlFor="evento" className="block text-sm font-semibold">
-            Evento
-          </label>
-          <select
-            id="evento"
-            name="evento"
-            defaultValue={eventoId ?? ""}
-            className="h-11 min-w-52 rounded-lg border border-input bg-card px-3"
-          >
-            <option value="">Todos</option>
-            {eventos.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.nome}
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="space-y-1.5">
           <label htmlFor="status" className="block text-sm font-semibold">
             Situação
@@ -111,7 +106,7 @@ export default async function AdminInscricoesPage({ searchParams }: Props) {
           Nenhuma inscrição com esses filtros.
         </p>
       ) : (
-        <TabelaInscricoes inscricoes={inscricoes} />
+        <TabelaInscricoes inscricoes={inscricoes} mostrarEvento={false} />
       )}
     </div>
   );
