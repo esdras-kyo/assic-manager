@@ -26,7 +26,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const evento = await buscarEventoPorSlug(slug);
   if (!evento) return { title: "Evento não encontrado" };
-  return { title: evento.nome, description: evento.descricao ?? undefined };
+
+  const conteudo = evento.conteudo as Conteudo | null;
+  const descricao = evento.descricao ?? conteudo?.subtitulo ?? undefined;
+  const imagem = conteudo?.imagemCapa;
+
+  return {
+    title: evento.nome,
+    description: descricao,
+    openGraph: {
+      title: evento.nome,
+      description: descricao,
+      type: "website",
+      ...(imagem && {
+        images: [{ url: imagem, alt: `Capa do evento ${evento.nome}` }],
+      }),
+    },
+    twitter: {
+      card: imagem ? "summary_large_image" : "summary",
+      title: evento.nome,
+      description: descricao,
+      ...(imagem && { images: [imagem] }),
+    },
+  };
 }
 
 export default async function EventoPage({ params }: Props) {
