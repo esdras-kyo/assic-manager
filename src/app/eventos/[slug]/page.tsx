@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ImagemEvento } from "@/components/eventos/imagem-evento";
 import { LandingEvento } from "@/components/eventos/landing-evento";
-import { formatarDataExtensa, formatarPrecoBRL } from "@/lib/formatadores";
+import { formatarPeriodoEvento, formatarPrecoBRL } from "@/lib/formatadores";
 import type { Conteudo } from "@/lib/validations";
 import { buscarEventoPorSlug } from "@/services/evento.service";
 import { contarInscricoesAtivas } from "@/services/inscricao.service";
@@ -84,7 +84,7 @@ export default async function EventoPage({ params }: Props) {
               <span className="sr-only">Data</span>
             </dt>
             <dd className="first-letter:uppercase">
-              {formatarDataExtensa(evento.dataInicio)}
+              {formatarPeriodoEvento(evento.dataInicio, evento.dataFim)}
             </dd>
           </div>
           <div className="flex items-start gap-4">

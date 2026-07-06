@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   dataParaInputLocal,
   formatarDataExtensa,
+  formatarPeriodoEvento,
   formatarPrecoBRL,
   gerarSlug,
   inputLocalParaData,
@@ -102,5 +103,52 @@ describe("mascararCelular (incremental)", () => {
     ["119876543219999", "(11) 98765-4321"], // trava em 11 dígitos
   ])("%s → %s", (entrada, saida) => {
     expect(mascararCelular(entrada)).toBe(saida);
+  });
+});
+
+describe("formatarPeriodoEvento", () => {
+  it("fim null → igual a formatarDataExtensa", () => {
+    const inicio = new Date("2026-07-10T19:00:00.000Z");
+    expect(formatarPeriodoEvento(inicio, null)).toBe(
+      formatarDataExtensa(inicio),
+    );
+  });
+
+  it("fim no mesmo dia (SP) → single-day", () => {
+    const inicio = new Date("2026-07-10T19:00:00.000Z"); // 16h SP, 10 jul
+    const fim = new Date("2026-07-10T22:00:00.000Z"); // 19h SP, 10 jul
+    expect(formatarPeriodoEvento(inicio, fim)).toBe(
+      formatarDataExtensa(inicio),
+    );
+  });
+
+  it("dias no mesmo mês → intervalo só datas", () => {
+    const inicio = new Date("2026-07-10T13:00:00.000Z");
+    const fim = new Date("2026-07-11T13:00:00.000Z");
+    expect(formatarPeriodoEvento(inicio, fim)).toBe("10 a 11 de julho de 2026");
+  });
+
+  it("meses diferentes, mesmo ano", () => {
+    const inicio = new Date("2026-07-30T13:00:00.000Z");
+    const fim = new Date("2026-08-02T13:00:00.000Z");
+    expect(formatarPeriodoEvento(inicio, fim)).toBe(
+      "30 de julho a 2 de agosto de 2026",
+    );
+  });
+
+  it("anos diferentes", () => {
+    const inicio = new Date("2026-12-30T13:00:00.000Z");
+    const fim = new Date("2027-01-02T13:00:00.000Z");
+    expect(formatarPeriodoEvento(inicio, fim)).toBe(
+      "30 de dezembro de 2026 a 2 de janeiro de 2027",
+    );
+  });
+
+  it("mesmo dia local SP apesar de UTC diferente → single-day", () => {
+    const inicio = new Date("2026-07-11T01:00:00.000Z"); // 22h SP, 10 jul
+    const fim = new Date("2026-07-11T02:00:00.000Z"); // 23h SP, 10 jul
+    expect(formatarPeriodoEvento(inicio, fim)).toBe(
+      formatarDataExtensa(inicio),
+    );
   });
 });

@@ -32,6 +32,47 @@ export function formatarDataExtensa(data: Date): string {
   return `${dataExtensa.format(data)}, às ${hora}`;
 }
 
+// Dia-calendário no fuso SP, no formato YYYY-MM-DD, para comparar "mesmo dia".
+const diaCalendarioSP = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Sao_Paulo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const diaNumSP = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "numeric",
+});
+const mesLongoSP = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  month: "long",
+});
+const anoSP = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  year: "numeric",
+});
+
+/**
+ * Data do evento legível. Evento de 1 dia (sem fim, ou fim no mesmo dia-
+ * calendário de SP) → igual a formatarDataExtensa (com hora). Multi-dia →
+ * intervalo só de datas: "10 a 11 de julho de 2026".
+ */
+export function formatarPeriodoEvento(inicio: Date, fim: Date | null): string {
+  if (!fim || diaCalendarioSP.format(inicio) === diaCalendarioSP.format(fim)) {
+    return formatarDataExtensa(inicio);
+  }
+  const d1 = diaNumSP.format(inicio);
+  const m1 = mesLongoSP.format(inicio);
+  const a1 = anoSP.format(inicio);
+  const d2 = diaNumSP.format(fim);
+  const m2 = mesLongoSP.format(fim);
+  const a2 = anoSP.format(fim);
+
+  if (a1 === a2 && m1 === m2) return `${d1} a ${d2} de ${m1} de ${a1}`;
+  if (a1 === a2) return `${d1} de ${m1} a ${d2} de ${m2} de ${a1}`;
+  return `${d1} de ${m1} de ${a1} a ${d2} de ${m2} de ${a2}`;
+}
+
 /**
  * Entrada de preço do admin → centavos (int). Aceita "50", "50,00",
  * "1.234,56" (BR) e "50.5" (decimal com ponto). Inválido/negativo → null.

@@ -3,7 +3,7 @@ import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 
 import { ImagemEvento } from "@/components/eventos/imagem-evento";
 import { Button } from "@/components/ui/button";
-import { formatarDataExtensa, formatarPrecoBRL } from "@/lib/formatadores";
+import { formatarPeriodoEvento, formatarPrecoBRL } from "@/lib/formatadores";
 import type { Conteudo } from "@/lib/validations";
 import type { Evento } from "@/generated/prisma/client";
 
@@ -33,7 +33,7 @@ export function CardEvento({ evento }: { evento: Evento }) {
               <span className="sr-only">Data</span>
             </dt>
             <dd className="first-letter:uppercase">
-              {formatarDataExtensa(evento.dataInicio)}
+              {formatarPeriodoEvento(evento.dataInicio, evento.dataFim)}
             </dd>
           </div>
           <div className="flex items-center gap-3">

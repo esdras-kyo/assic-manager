@@ -6,7 +6,7 @@ import { CalendarDays, MapPin } from "lucide-react";
 import { SucessoAnimado } from "@/components/eventos/sucesso-animado";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
-import { formatarDataExtensa } from "@/lib/formatadores";
+import { formatarPeriodoEvento } from "@/lib/formatadores";
 
 export const metadata: Metadata = { title: "Inscrição confirmada" };
 
@@ -48,7 +48,10 @@ export default async function SucessoPage({ params }: Props) {
                 className="size-5 shrink-0 text-primary"
               />
               <span className="first-letter:uppercase">
-                {formatarDataExtensa(inscricao.evento.dataInicio)}
+                {formatarPeriodoEvento(
+                  inscricao.evento.dataInicio,
+                  inscricao.evento.dataFim,
+                )}
               </span>
             </p>
             <p className="flex items-center gap-3">

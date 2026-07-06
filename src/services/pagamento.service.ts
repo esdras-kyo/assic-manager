@@ -139,6 +139,7 @@ export async function confirmarPagamento(gatewayPaymentId: string): Promise<{
       eventoNome: pagamento.inscricao.evento.nome,
       eventoLocal: pagamento.inscricao.evento.local,
       eventoDataInicio: pagamento.inscricao.evento.dataInicio,
+      eventoDataFim: pagamento.inscricao.evento.dataFim,
     });
   } catch (erro) {
     console.error("Falha ao enviar email de confirmação:", erro);

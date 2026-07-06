@@ -24,6 +24,7 @@ describe("enviarConfirmacaoInscricao", () => {
     eventoNome: "Encontro de Junho",
     eventoLocal: "Salão Principal",
     eventoDataInicio: new Date("2026-07-10T19:00:00.000Z"),
+    eventoDataFim: null,
   };
 
   it("envia para o email do inscrito com evento no assunto", async () => {

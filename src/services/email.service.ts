@@ -3,12 +3,7 @@ import {
   montarHtmlConfirmacao,
   montarTextoConfirmacao,
 } from "@/services/email/templates";
-
-const formatadorData = new Intl.DateTimeFormat("pt-BR", {
-  dateStyle: "full",
-  timeStyle: "short",
-  timeZone: "America/Sao_Paulo",
-});
+import { formatarPeriodoEvento } from "@/lib/formatadores";
 
 export interface ConfirmacaoInscricaoDados {
   nome: string;
@@ -16,6 +11,7 @@ export interface ConfirmacaoInscricaoDados {
   eventoNome: string;
   eventoLocal: string;
   eventoDataInicio: Date;
+  eventoDataFim: Date | null;
 }
 
 /**
@@ -29,7 +25,7 @@ export async function enviarConfirmacaoInscricao(
     primeiroNome: dados.nome.split(" ")[0],
     eventoNome: dados.eventoNome,
     eventoLocal: dados.eventoLocal,
-    quando: formatadorData.format(dados.eventoDataInicio),
+    quando: formatarPeriodoEvento(dados.eventoDataInicio, dados.eventoDataFim),
   };
 
   await getEmailSender().send({

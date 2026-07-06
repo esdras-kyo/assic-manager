@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { FormInscricao } from "@/components/eventos/form-inscricao";
 import { ImagemEvento } from "@/components/eventos/imagem-evento";
-import { formatarDataExtensa, formatarPrecoBRL } from "@/lib/formatadores";
+import { formatarPeriodoEvento, formatarPrecoBRL } from "@/lib/formatadores";
 import type { CampoPersonalizado, Conteudo } from "@/lib/validations";
 import { buscarEventoPorSlug } from "@/services/evento.service";
 import { contarInscricoesAtivas } from "@/services/inscricao.service";
@@ -50,7 +50,7 @@ export default async function InscricaoPage({ params }: Props) {
         <div className="p-5">
           <p className="text-xl font-bold">{evento.nome}</p>
           <p className="mt-1 text-muted-foreground first-letter:uppercase">
-            {formatarDataExtensa(evento.dataInicio)}
+            {formatarPeriodoEvento(evento.dataInicio, evento.dataFim)}
           </p>
           <p className="mt-1 text-lg font-bold text-primary">
             {formatarPrecoBRL(evento.precoEmCentavos)}
