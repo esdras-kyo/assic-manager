@@ -36,6 +36,7 @@ describe("POST /api/pagamentos/webhook", () => {
     expect(mockProcessar).toHaveBeenCalledWith(
       '{"a":1}',
       expect.objectContaining({ "x-fake-signature": "s3" }),
+      {},
     );
   });
 

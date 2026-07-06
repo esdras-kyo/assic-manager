@@ -155,9 +155,10 @@ export async function confirmarPagamento(gatewayPaymentId: string): Promise<{
 export async function processarWebhook(
   rawBody: string,
   headers: Record<string, string>,
+  query?: Record<string, string>,
 ): Promise<WebhookResult> {
   const gateway = getPaymentGateway();
-  const resultado = await gateway.parseWebhook(rawBody, headers);
+  const resultado = await gateway.parseWebhook(rawBody, headers, query);
 
   switch (resultado.status) {
     case "paid":

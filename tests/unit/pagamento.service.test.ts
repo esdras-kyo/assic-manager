@@ -285,7 +285,11 @@ describe("processarWebhook", () => {
 
     await processarWebhook("body", { h: "1" });
 
-    expect(gatewayMock.parseWebhook).toHaveBeenCalledWith("body", { h: "1" });
+    expect(gatewayMock.parseWebhook).toHaveBeenCalledWith(
+      "body",
+      { h: "1" },
+      undefined,
+    );
     expect(mocked.pagamento.update).toHaveBeenCalledWith({
       where: { gatewayPaymentId: "fake_abc" },
       data: { status: "PAID" },

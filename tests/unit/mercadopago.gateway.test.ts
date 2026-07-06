@@ -182,6 +182,28 @@ describe("MercadoPagoGateway.parseWebhook", () => {
     );
   });
 
+  it("lê data.id/type da query com corpo vazio (caso do simulador)", async () => {
+    fetchMock.mockResolvedValue(
+      respostaOk({ id: 123, status: "approved", external_reference: "insc1" }),
+    );
+    const headers = assinar("123", "req-1", "1700000000");
+
+    const r = await gateway.parseWebhook("", headers, {
+      "data.id": "123",
+      type: "payment",
+    });
+
+    expect(r).toEqual({
+      gatewayPaymentId: "123",
+      status: "paid",
+      inscricaoId: "insc1",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.mercadopago.com/v1/payments/123",
+      expect.objectContaining({ method: "GET" }),
+    );
+  });
+
   it("assinatura inválida lança e não chama a API", async () => {
     const body = JSON.stringify({ type: "payment", data: { id: "123" } });
     await expect(

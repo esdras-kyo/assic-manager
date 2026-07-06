@@ -144,18 +144,30 @@ export class MercadoPagoGateway implements PaymentGateway {
   async parseWebhook(
     rawBody: string,
     headers: Record<string, string>,
+    query: Record<string, string> = {},
   ): Promise<WebhookResult> {
-    const payload = JSON.parse(rawBody) as {
-      type?: string;
-      data?: { id?: string | number };
-    };
-    const dataId = payload.data?.id != null ? String(payload.data.id) : "";
+    // Corpo pode vir vazio (ex.: simulador do MP) — não pode quebrar o parse.
+    let payload: { type?: string; data?: { id?: string | number } } = {};
+    if (rawBody) {
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        // Corpo inválido/ausente: a query é a fonte canônica abaixo.
+      }
+    }
+
+    // data.id e type: a query é a fonte oficial do MP (a assinatura usa o
+    // data.id da query); o corpo é fallback.
+    const dataId =
+      query["data.id"] ??
+      (payload.data?.id != null ? String(payload.data.id) : "");
+    const tipo = query["type"] ?? payload.type;
 
     this.validarAssinatura(dataId, headers);
 
     // Só notificações de pagamento têm o que processar. As demais
     // (merchant_order etc.) viram no-op → rota responde 200, MP não reenvia.
-    if (payload.type !== "payment" || !dataId) {
+    if (tipo !== "payment" || !dataId) {
       return { gatewayPaymentId: dataId, status: "pending" };
     }
 

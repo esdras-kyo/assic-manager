@@ -8,9 +8,11 @@ import { AssinaturaInvalidaError } from "@/services/payment/errors";
 export async function POST(request: Request) {
   const rawBody = await request.text();
   const headers = Object.fromEntries(request.headers.entries());
+  // O MP manda data.id/type na query e assina usando o data.id da query.
+  const query = Object.fromEntries(new URL(request.url).searchParams.entries());
 
   try {
-    await processarWebhook(rawBody, headers);
+    await processarWebhook(rawBody, headers, query);
     return NextResponse.json({ received: true });
   } catch (erro) {
     if (erro instanceof AssinaturaInvalidaError) {

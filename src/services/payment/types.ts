@@ -35,9 +35,14 @@ export interface PaymentGateway {
   readonly name: string;
   createPayment(input: CreatePaymentInput): Promise<CreatePaymentResult>;
   getPayment(gatewayPaymentId: string): Promise<{ status: PaymentStatus }>;
-  /** Valida assinatura E traduz o payload — lança se a assinatura for inválida. */
+  /**
+   * Valida assinatura E traduz o payload — lança se a assinatura for inválida.
+   * `query` traz os params da URL (ex.: data.id, type) — o MP assina usando o
+   * data.id da query, e em alguns webhooks o corpo vem vazio.
+   */
   parseWebhook(
     rawBody: string,
     headers: Record<string, string>,
+    query?: Record<string, string>,
   ): Promise<WebhookResult>;
 }
