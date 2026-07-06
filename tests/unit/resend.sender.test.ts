@@ -96,4 +96,23 @@ describe("ResendEmailSender", () => {
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body.reply_to).toBeUndefined();
   });
+
+  it("encaminha headers customizados no corpo", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => "",
+    } as Response);
+
+    const sender = new ResendEmailSender("re_x", "ASSIC <no@dominio.com>");
+    await sender.send({
+      to: "a@b.com",
+      subject: "s",
+      text: "t",
+      headers: { "List-Unsubscribe": "<mailto:x@y.com>" },
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.headers).toEqual({ "List-Unsubscribe": "<mailto:x@y.com>" });
+  });
 });

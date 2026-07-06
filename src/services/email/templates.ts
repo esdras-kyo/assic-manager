@@ -31,6 +31,8 @@ export function montarTextoConfirmacao(d: ConfirmacaoEmailDados): string {
     "",
     `Sua inscrição no evento "${d.eventoNome}" está confirmada.`,
     "",
+    "Que alegria ter você com a gente! Confira abaixo os detalhes do encontro e, se tiver qualquer dúvida, é só responder este email.",
+    "",
     `📅 Quando: ${d.quando}`,
     `📍 Onde: ${d.eventoLocal}`,
     "",
@@ -54,8 +56,11 @@ export function montarHtmlConfirmacao(d: ConfirmacaoEmailDados): string {
             <tr>
               <td style="padding:32px;">
                 <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#18181b;">Inscrição confirmada</h1>
-                <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#3f3f46;">
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#3f3f46;">
                   Olá, <strong>${esc(d.primeiroNome)}</strong>! Sua inscrição no evento <strong>${esc(d.eventoNome)}</strong> está confirmada.
+                </p>
+                <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#3f3f46;">
+                  Que alegria ter você com a gente! Confira abaixo os detalhes do encontro e, se tiver qualquer dúvida, é só responder este email.
                 </p>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;border-radius:12px;">
                   <tr>

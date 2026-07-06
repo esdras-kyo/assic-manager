@@ -57,6 +57,14 @@ describe("enviarConfirmacaoInscricao", () => {
     expect(msg.html).not.toContain("🎉");
     expect(msg.html).toContain("responda este email ou fale com a organização");
   });
+
+  it("inclui header List-Unsubscribe a partir do reply-to", async () => {
+    await enviarConfirmacaoInscricao(dados);
+    const msg = sendMock.mock.calls[0][0];
+    expect(msg.headers?.["List-Unsubscribe"]).toBe(
+      "<mailto:contato@marketingamesa.com.br>",
+    );
+  });
 });
 
 describe("ConsoleEmailSender", () => {

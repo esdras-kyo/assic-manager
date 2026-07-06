@@ -36,5 +36,9 @@ export async function enviarConfirmacaoInscricao(
     text: montarTextoConfirmacao(conteudo),
     html: montarHtmlConfirmacao(conteudo),
     ...(replyTo && { replyTo }),
+    // Opt-out por email (melhora deliverability; e-mail é transacional).
+    ...(replyTo && {
+      headers: { "List-Unsubscribe": `<mailto:${replyTo}>` },
+    }),
   });
 }

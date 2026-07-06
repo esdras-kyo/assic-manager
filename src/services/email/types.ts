@@ -10,6 +10,8 @@ export interface EmailMessage {
   html?: string;
   /** Endereço de resposta (header Reply-To). Opcional. */
   replyTo?: string;
+  /** Headers extras (ex.: List-Unsubscribe). Opcional. */
+  headers?: Record<string, string>;
 }
 
 export interface EmailSender {
