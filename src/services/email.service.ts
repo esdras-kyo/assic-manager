@@ -4,6 +4,7 @@ import {
   montarTextoConfirmacao,
 } from "@/services/email/templates";
 import { formatarPeriodoEvento } from "@/lib/formatadores";
+import { getEnv } from "@/lib/env";
 
 export interface ConfirmacaoInscricaoDados {
   nome: string;
@@ -28,10 +29,12 @@ export async function enviarConfirmacaoInscricao(
     quando: formatarPeriodoEvento(dados.eventoDataInicio, dados.eventoDataFim),
   };
 
+  const replyTo = getEnv().EMAIL_REPLY_TO;
   await getEmailSender().send({
     to: dados.email,
-    subject: `Inscrição confirmada — ${dados.eventoNome}`,
+    subject: `Inscrição confirmada - ${dados.eventoNome}`,
     text: montarTextoConfirmacao(conteudo),
     html: montarHtmlConfirmacao(conteudo),
+    ...(replyTo && { replyTo }),
   });
 }

@@ -7,6 +7,10 @@ vi.mock("@/services/email", () => ({
   getEmailSender: vi.fn(),
 }));
 
+vi.mock("@/lib/env", () => ({
+  getEnv: vi.fn(() => ({ EMAIL_REPLY_TO: "contato@marketingamesa.com.br" })),
+}));
+
 const sendMock = vi.fn();
 
 beforeEach(() => {
@@ -36,6 +40,22 @@ describe("enviarConfirmacaoInscricao", () => {
     expect(msg.subject).toMatch(/Encontro de Junho/);
     expect(msg.text).toMatch(/Maria/);
     expect(msg.text).toMatch(/Salão Principal/);
+  });
+
+  it("inclui replyTo e subject com hífen", async () => {
+    await enviarConfirmacaoInscricao(dados);
+    const msg = sendMock.mock.calls[0][0];
+    expect(msg.replyTo).toBe("contato@marketingamesa.com.br");
+    expect(msg.subject).toBe("Inscrição confirmada - Encontro de Junho");
+  });
+
+  it("texto sem emoji de festa e com a nova linha final", async () => {
+    await enviarConfirmacaoInscricao(dados);
+    const msg = sendMock.mock.calls[0][0];
+    expect(msg.text).not.toContain("🎉");
+    expect(msg.text).toContain("responda esta mensagem");
+    expect(msg.html).not.toContain("🎉");
+    expect(msg.html).toContain("responda este email ou fale com a organização");
   });
 });
 

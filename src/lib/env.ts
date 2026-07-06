@@ -26,6 +26,8 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   // Remetente verificado, ex.: "ASSIC <nao-responda@marketingamesa.com.br>".
   EMAIL_FROM: z.string().optional(),
+  // Reply-To opcional (header por mensagem), ex.: "contato@marketingamesa.com.br".
+  EMAIL_REPLY_TO: z.string().optional(),
   // Assina o cookie de sessão do admin. Gerar com: openssl rand -base64 32
   AUTH_SECRET: z
     .string({ error: "AUTH_SECRET é obrigatória" })

@@ -63,4 +63,37 @@ describe("ResendEmailSender", () => {
       sender.send({ to: "a@b.com", subject: "s", text: "t" }),
     ).rejects.toThrow(/422/);
   });
+
+  it("inclui reply_to quando replyTo é passado", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => "",
+    } as Response);
+
+    const sender = new ResendEmailSender("re_x", "ASSIC <no@dominio.com>");
+    await sender.send({
+      to: "maria@example.com",
+      subject: "Oi",
+      text: "corpo",
+      replyTo: "contato@marketingamesa.com.br",
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.reply_to).toBe("contato@marketingamesa.com.br");
+  });
+
+  it("omite reply_to quando replyTo não é passado", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => "",
+    } as Response);
+
+    const sender = new ResendEmailSender("re_x", "ASSIC <no@dominio.com>");
+    await sender.send({ to: "a@b.com", subject: "s", text: "t" });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.reply_to).toBeUndefined();
+  });
 });

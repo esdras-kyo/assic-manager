@@ -8,6 +8,8 @@ export interface EmailMessage {
   text: string;
   /** Versão HTML opcional — quando presente, clientes a preferem. */
   html?: string;
+  /** Endereço de resposta (header Reply-To). Opcional. */
+  replyTo?: string;
 }
 
 export interface EmailSender {

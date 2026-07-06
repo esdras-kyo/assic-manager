@@ -29,12 +29,12 @@ export function montarTextoConfirmacao(d: ConfirmacaoEmailDados): string {
   return [
     `Olá, ${d.primeiroNome}!`,
     "",
-    `Sua inscrição no evento "${d.eventoNome}" está confirmada. 🎉`,
+    `Sua inscrição no evento "${d.eventoNome}" está confirmada.`,
     "",
     `📅 Quando: ${d.quando}`,
     `📍 Onde: ${d.eventoLocal}`,
     "",
-    "Guarde este email. Até lá!",
+    "Guarde este email. Em caso de dúvidas, responda esta mensagem.",
   ].join("\n");
 }
 
@@ -53,7 +53,7 @@ export function montarHtmlConfirmacao(d: ConfirmacaoEmailDados): string {
             </tr>
             <tr>
               <td style="padding:32px;">
-                <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#18181b;">Inscrição confirmada 🎉</h1>
+                <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#18181b;">Inscrição confirmada</h1>
                 <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#3f3f46;">
                   Olá, <strong>${esc(d.primeiroNome)}</strong>! Sua inscrição no evento <strong>${esc(d.eventoNome)}</strong> está confirmada.
                 </p>
@@ -66,14 +66,15 @@ export function montarHtmlConfirmacao(d: ConfirmacaoEmailDados): string {
                   </tr>
                 </table>
                 <p style="margin:20px 0 0;font-size:15px;line-height:1.6;color:#3f3f46;">
-                  Guarde este email. Até lá!
+                  Guarde este email. Em caso de dúvidas, responda esta mensagem.
                 </p>
               </td>
             </tr>
             <tr>
               <td style="padding:18px 32px;border-top:1px solid #e4e4e7;">
                 <p style="margin:0;font-size:12px;line-height:1.5;color:#a1a1aa;">
-                  Você recebeu este email porque se inscreveu em um evento da ASSIC.
+                  Você recebeu este email porque se inscreveu em um evento da ASSIC.<br />
+                  Em caso de dúvidas, responda este email ou fale com a organização.
                 </p>
               </td>
             </tr>
