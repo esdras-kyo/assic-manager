@@ -170,7 +170,6 @@ export async function processarWebhook(
     case "refunded": {
       const pagamento = await prisma.pagamento.findUnique({
         where: { gatewayPaymentId: resultado.gatewayPaymentId },
-        include: { inscricao: true },
       });
       if (!pagamento) {
         throw new PagamentoNaoEncontradoError(resultado.gatewayPaymentId);

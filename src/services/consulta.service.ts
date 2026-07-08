@@ -6,6 +6,11 @@ import { enviarLinkConsulta } from "@/services/email.service";
 // Magic link de consulta: validade de 7 dias (planoassic — decisão de design).
 const VALIDADE_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Normaliza email para comparação/gravação (evita link que "some" por caixa). */
+function normalizarEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 /** Token opaco (sem hifens) usado na URL de consulta. */
 export function gerarToken(): string {
   return crypto.randomUUID().replace(/-/g, "");
@@ -15,7 +20,9 @@ export function gerarToken(): string {
 export async function criarTokenConsulta(email: string): Promise<string> {
   const token = gerarToken();
   const expiraEm = new Date(Date.now() + VALIDADE_MS);
-  await prisma.tokenConsulta.create({ data: { token, email, expiraEm } });
+  await prisma.tokenConsulta.create({
+    data: { token, email: normalizarEmail(email), expiraEm },
+  });
   return token;
 }
 
@@ -40,7 +47,10 @@ export async function listarInscricoesPorEmail(
   email: string,
 ): Promise<(Inscricao & { evento: Evento })[]> {
   return prisma.inscricao.findMany({
-    where: { email, status: { in: ["PENDENTE", "CONFIRMADA"] } },
+    where: {
+      email: { equals: normalizarEmail(email), mode: "insensitive" },
+      status: { in: ["PENDENTE", "CONFIRMADA"] },
+    },
     include: { evento: true },
     orderBy: { criadoEm: "desc" },
   });
@@ -51,12 +61,19 @@ export async function listarInscricoesPorEmail(
  * inscrição para aquele email; a UI mostra sempre a mesma mensagem.
  */
 export async function solicitarLinkConsulta(email: string): Promise<void> {
+  const emailNorm = normalizarEmail(email);
   const inscricoes = await prisma.inscricao.findMany({
-    where: { email, status: { in: ["PENDENTE", "CONFIRMADA"] } },
+    where: {
+      email: { equals: emailNorm, mode: "insensitive" },
+      status: { in: ["PENDENTE", "CONFIRMADA"] },
+    },
     select: { id: true },
   });
   if (inscricoes.length === 0) return;
 
-  const token = await criarTokenConsulta(email);
-  await enviarLinkConsulta({ email, link: montarLinkConsulta(token) });
+  const token = await criarTokenConsulta(emailNorm);
+  await enviarLinkConsulta({
+    email: emailNorm,
+    link: montarLinkConsulta(token),
+  });
 }

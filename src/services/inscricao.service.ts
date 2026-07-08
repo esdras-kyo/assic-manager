@@ -105,6 +105,11 @@ export async function cancelarInscricao(id: string): Promise<Inscricao> {
   return mudarStatus(id, "CANCELADA");
 }
 
+/**
+ * Transição manual para EXPIRADA. Sem chamador em produção hoje: o Pix
+ * expirado NÃO expira mais a inscrição (ela segue PENDENTE e pagável).
+ * Reservado para cancelamento/ação futura do admin.
+ */
 export async function expirarInscricao(id: string): Promise<Inscricao> {
   return mudarStatus(id, "EXPIRADA");
 }

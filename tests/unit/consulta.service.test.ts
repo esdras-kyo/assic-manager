@@ -91,7 +91,7 @@ describe("listarInscricoesPorEmail", () => {
 
     expect(mocked.inscricao.findMany).toHaveBeenCalledWith({
       where: {
-        email: "maria@example.com",
+        email: { equals: "maria@example.com", mode: "insensitive" },
         status: { in: ["PENDENTE", "CONFIRMADA"] },
       },
       include: { evento: true },

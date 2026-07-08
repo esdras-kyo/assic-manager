@@ -29,7 +29,9 @@ export const inscricaoCreateSchema = z.object({
     .trim()
     .min(3, { error: "Digite seu nome completo" })
     .max(120, { error: "Nome muito longo" }),
-  email: z.email({ error: "Digite um email válido, como nome@exemplo.com" }),
+  email: z
+    .email({ error: "Digite um email válido, como nome@exemplo.com" })
+    .transform((v) => v.toLowerCase()),
   celular: z
     .string({ error: "Digite seu celular com DDD" })
     .refine(celularValido, {

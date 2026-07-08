@@ -176,7 +176,7 @@ function montarHtmlComBotao(d: {
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="border-radius:10px;background:${AZUL};">
-                      <a href="${d.link}" style="display:inline-block;padding:14px 28px;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;">${esc(d.botaoTexto)}</a>
+                      <a href="${esc(d.link)}" style="display:inline-block;padding:14px 28px;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;">${esc(d.botaoTexto)}</a>
                     </td>
                   </tr>
                 </table>

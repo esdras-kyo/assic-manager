@@ -114,4 +114,6 @@ model TokenConsulta {
   email    String
   expiraEm DateTime
   criadoEm DateTime @default(now())
+
+  @@index([email])
 }
