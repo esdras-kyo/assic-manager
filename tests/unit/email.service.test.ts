@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { enviarConfirmacaoInscricao } from "@/services/email.service";
+import {
+  enviarConfirmacaoInscricao,
+  enviarInscricaoRecebida,
+  enviarLinkConsulta,
+} from "@/services/email.service";
 import { getEmailSender } from "@/services/email";
 
 vi.mock("@/services/email", () => ({
@@ -64,6 +68,36 @@ describe("enviarConfirmacaoInscricao", () => {
     expect(msg.headers?.["List-Unsubscribe"]).toBe(
       "<mailto:contato@marketingamesa.com.br>",
     );
+  });
+});
+
+describe("enviarInscricaoRecebida", () => {
+  const dados = {
+    nome: "Maria da Silva",
+    email: "maria@example.com",
+    eventoNome: "Encontro de Junho",
+    link: "https://assic.example.com/minhas-inscricoes/abc123",
+  };
+
+  it("envia para o inscrito com link e assunto do evento", async () => {
+    await enviarInscricaoRecebida(dados);
+    expect(sendMock).toHaveBeenCalledOnce();
+    const msg = sendMock.mock.calls[0][0];
+    expect(msg.to).toBe("maria@example.com");
+    expect(msg.subject).toMatch(/Encontro de Junho/);
+    expect(msg.text).toContain(dados.link);
+    expect(msg.html).toContain(`href="${dados.link}"`);
+  });
+});
+
+describe("enviarLinkConsulta", () => {
+  it("envia o link de consulta para o email informado", async () => {
+    const link = "https://assic.example.com/minhas-inscricoes/xyz";
+    await enviarLinkConsulta({ email: "joao@example.com", link });
+    const msg = sendMock.mock.calls[0][0];
+    expect(msg.to).toBe("joao@example.com");
+    expect(msg.text).toContain(link);
+    expect(msg.html).toContain(`href="${link}"`);
   });
 });
 
