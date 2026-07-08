@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import type { Inscricao, Evento } from "@/generated/prisma/client";
+import { enviarLinkConsulta } from "@/services/email.service";
 
 // Magic link de consulta: validade de 7 dias (planoassic — decisão de design).
 const VALIDADE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -43,4 +44,19 @@ export async function listarInscricoesPorEmail(
     include: { evento: true },
     orderBy: { criadoEm: "desc" },
   });
+}
+
+/**
+ * Envia o link de consulta por email. Anti-enumeração: só envia se houver
+ * inscrição para aquele email; a UI mostra sempre a mesma mensagem.
+ */
+export async function solicitarLinkConsulta(email: string): Promise<void> {
+  const inscricoes = await prisma.inscricao.findMany({
+    where: { email, status: { in: ["PENDENTE", "CONFIRMADA"] } },
+    select: { id: true },
+  });
+  if (inscricoes.length === 0) return;
+
+  const token = await criarTokenConsulta(email);
+  await enviarLinkConsulta({ email, link: montarLinkConsulta(token) });
 }

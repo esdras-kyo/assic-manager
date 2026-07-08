@@ -6,7 +6,13 @@ import {
   listarInscricoesPorEmail,
   montarLinkConsulta,
   resolverTokenConsulta,
+  solicitarLinkConsulta,
 } from "@/services/consulta.service";
+import { enviarLinkConsulta } from "@/services/email.service";
+
+vi.mock("@/services/email.service", () => ({
+  enviarLinkConsulta: vi.fn(),
+}));
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -91,5 +97,33 @@ describe("listarInscricoesPorEmail", () => {
       include: { evento: true },
       orderBy: { criadoEm: "desc" },
     });
+  });
+});
+
+describe("solicitarLinkConsulta", () => {
+  it("com inscrições: cria token e envia o link", async () => {
+    mocked.inscricao.findMany.mockResolvedValue([{ id: "i1" }] as never);
+    mocked.tokenConsulta.create.mockResolvedValue({} as never);
+
+    await solicitarLinkConsulta("maria@example.com");
+
+    expect(mocked.tokenConsulta.create).toHaveBeenCalled();
+    expect(enviarLinkConsulta).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "maria@example.com",
+        link: expect.stringContaining(
+          "https://assic.example.com/minhas-inscricoes/",
+        ),
+      }),
+    );
+  });
+
+  it("sem inscrições: não cria token nem envia (anti-enumeração)", async () => {
+    mocked.inscricao.findMany.mockResolvedValue([] as never);
+
+    await solicitarLinkConsulta("ninguem@example.com");
+
+    expect(mocked.tokenConsulta.create).not.toHaveBeenCalled();
+    expect(enviarLinkConsulta).not.toHaveBeenCalled();
   });
 });
