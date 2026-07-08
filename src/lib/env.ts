@@ -32,6 +32,9 @@ const envSchema = z.object({
   AUTH_SECRET: z
     .string({ error: "AUTH_SECRET é obrigatória" })
     .min(32, { error: "AUTH_SECRET precisa de pelo menos 32 caracteres" }),
+  // URL base absoluta do site (sem barra final), p/ montar links em emails.
+  // Ex.: "https://assic.marketingamesa.com.br".
+  APP_URL: z.url({ error: "APP_URL deve ser uma URL absoluta (https://...)" }),
 });
 
 export type Env = z.infer<typeof envSchema>;

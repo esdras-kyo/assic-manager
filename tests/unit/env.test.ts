@@ -6,6 +6,7 @@ const envValida = {
   DATABASE_URL: "postgresql://user:pass@host:6543/db?pgbouncer=true",
   PAYMENT_PROVIDER: "fake",
   AUTH_SECRET: "um-segredo-de-teste-com-32-chars!!",
+  APP_URL: "https://assic.example.com",
 };
 
 describe("parseEnv", () => {
@@ -41,5 +42,18 @@ describe("parseEnv", () => {
     delete sem.PAYMENT_PROVIDER;
     const env = parseEnv(sem);
     expect(env.PAYMENT_PROVIDER).toBe("fake");
+  });
+
+  it("APP_URL ausente ou não-URL falha", () => {
+    const sem: Record<string, string> = { ...envValida };
+    delete sem.APP_URL;
+    expect(() => parseEnv(sem)).toThrowError(/APP_URL/);
+    expect(() => parseEnv({ ...envValida, APP_URL: "nao-e-url" })).toThrowError(
+      /APP_URL/,
+    );
+  });
+
+  it("expõe APP_URL válida", () => {
+    expect(parseEnv(envValida).APP_URL).toBe("https://assic.example.com");
   });
 });
