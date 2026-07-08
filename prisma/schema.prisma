@@ -105,3 +105,13 @@ model Admin {
   nome      String
   criadoEm  DateTime @default(now())
 }
+
+// Token opaco p/ consulta de inscrições por email (magic link, validade 7d).
+// Escopo = email: o link lista todas as inscrições daquele email.
+model TokenConsulta {
+  id       String   @id @default(cuid())
+  token    String   @unique
+  email    String
+  expiraEm DateTime
+  criadoEm DateTime @default(now())
+}
