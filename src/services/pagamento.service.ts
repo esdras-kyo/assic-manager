@@ -178,22 +178,12 @@ export async function processarWebhook(
       // Webhook atrasado não regride pagamento já PAID.
       if (pagamento.status === "PAID") break;
 
+      // Pix expirado/falho NÃO mata a inscrição: ela segue PENDENTE e
+      // pagável (o usuário pode gerar novo Pix ou pagar depois pela consulta).
       await prisma.pagamento.update({
         where: { gatewayPaymentId: resultado.gatewayPaymentId },
         data: { status: mapStatusGatewayParaDb(resultado.status) },
       });
-
-      // Pagamento expirado leva a inscrição PENDENTE junto (§8).
-      // failed/refunded não tocam a inscrição (pode tentar pagar de novo).
-      if (
-        resultado.status === "expired" &&
-        podeTransicionar(pagamento.inscricao.status, "EXPIRADA")
-      ) {
-        await prisma.inscricao.update({
-          where: { id: pagamento.inscricaoId },
-          data: { status: "EXPIRADA" },
-        });
-      }
       break;
     }
 

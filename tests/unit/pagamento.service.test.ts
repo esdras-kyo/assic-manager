@@ -305,7 +305,7 @@ describe("processarWebhook", () => {
     expect(mocked.inscricao.update).not.toHaveBeenCalled();
   });
 
-  it("expired marca pagamento EXPIRED e expira inscrição PENDENTE", async () => {
+  it("expired marca só o pagamento (inscrição segue PENDENTE e pagável)", async () => {
     gatewayMock.parseWebhook.mockResolvedValue({
       gatewayPaymentId: "fake_abc",
       status: "expired",
@@ -321,10 +321,8 @@ describe("processarWebhook", () => {
       where: { gatewayPaymentId: "fake_abc" },
       data: { status: "EXPIRED" },
     });
-    expect(mocked.inscricao.update).toHaveBeenCalledWith({
-      where: { id: "insc1" },
-      data: { status: "EXPIRADA" },
-    });
+    // Pix expirado NÃO mata a inscrição — ela segue PENDENTE e pagável.
+    expect(mocked.inscricao.update).not.toHaveBeenCalled();
   });
 
   it("failed marca só o pagamento (inscrição segue PENDENTE)", async () => {
