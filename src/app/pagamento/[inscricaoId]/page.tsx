@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { CircleAlert, RotateCcw } from "lucide-react";
-
-import { regerarPixAction } from "@/app/pagamento/[inscricaoId]/actions";
+import {
+  regerarPixAction,
+  reenviarLinkAction,
+} from "@/app/pagamento/[inscricaoId]/actions";
+import { OpcoesPagamento } from "@/components/eventos/opcoes-pagamento";
 import { PixManualPainel } from "@/components/eventos/pix-manual-painel";
 import { PixPainel } from "@/components/eventos/pix-painel";
-import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { formatarPrecoBRL } from "@/lib/formatadores";
 import type { PixManual } from "@/lib/validations";
 
 export const metadata: Metadata = { title: "Pagamento" };
+
+function mascararEmail(email: string): string {
+  const [usuario, dominio] = email.split("@");
+  if (!dominio) return email;
+  const visivel = usuario.slice(0, 1);
+  return `${visivel}${"*".repeat(Math.max(usuario.length - 1, 1))}@${dominio}`;
+}
 
 interface Props {
   params: Promise<{ inscricaoId: string }>;
@@ -58,10 +66,15 @@ export default async function PagamentoPage({ params }: Props) {
         </div>
         <div className="mt-10">
           {pix ? (
-            <PixManualPainel
-              pix={pix}
-              amount={inscricao.evento.precoEmCentavos / 100}
-            />
+            <OpcoesPagamento
+              reenviarLinkAction={reenviarLinkAction.bind(null, inscricao.id)}
+              emailMascarado={mascararEmail(inscricao.email)}
+            >
+              <PixManualPainel
+                pix={pix}
+                amount={inscricao.evento.precoEmCentavos / 100}
+              />
+            </OpcoesPagamento>
           ) : (
             <p className="text-lg text-muted-foreground">
               A chave PIX deste evento ainda não foi configurada. Fale com a
@@ -117,28 +130,11 @@ export default async function PagamentoPage({ params }: Props) {
             mostrarTriggerDev={process.env.NODE_ENV !== "production"}
           />
         ) : (
-          <div className="space-y-6">
-            <div
-              role="status"
-              className="flex items-start gap-3 rounded-xl border border-border bg-secondary p-5 text-lg"
-            >
-              <CircleAlert
-                aria-hidden
-                className="mt-0.5 size-6 shrink-0 text-muted-foreground"
-              />
-              <p>
-                {pagamento
-                  ? "Este código Pix não está mais válido. Gere um novo para continuar."
-                  : "Sua inscrição está reservada. Gere o código Pix para pagar."}
-              </p>
-            </div>
-            <form action={regerarComId}>
-              <Button type="submit" size="lg" className="h-14 w-full text-lg">
-                <RotateCcw aria-hidden className="size-5" />
-                {pagamento ? "Gerar novo código Pix" : "Gerar código Pix"}
-              </Button>
-            </form>
-          </div>
+          <OpcoesPagamento
+            gerarPixAction={regerarComId}
+            reenviarLinkAction={reenviarLinkAction.bind(null, inscricao.id)}
+            emailMascarado={mascararEmail(inscricao.email)}
+          />
         )}
       </div>
 
