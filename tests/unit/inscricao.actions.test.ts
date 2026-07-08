@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { criarInscricaoEPagarAction } from "@/app/eventos/[slug]/inscricao/actions";
 import { buscarEventoPorId } from "@/services/evento.service";
+import { enviarInscricaoRecebida } from "@/services/email.service";
 import { criarInscricao, SemVagasError } from "@/services/inscricao.service";
-import { iniciarPagamento } from "@/services/pagamento.service";
 
 vi.mock("@/services/evento.service", async (importOriginal) => {
   const original =
@@ -17,8 +17,15 @@ vi.mock("@/services/inscricao.service", async (importOriginal) => {
   return { ...original, criarInscricao: vi.fn() };
 });
 
-vi.mock("@/services/pagamento.service", () => ({
-  iniciarPagamento: vi.fn(),
+vi.mock("@/services/consulta.service", () => ({
+  criarTokenConsulta: vi.fn().mockResolvedValue("tok123"),
+  montarLinkConsulta: vi.fn(
+    () => "https://assic.example.com/minhas-inscricoes/tok123",
+  ),
+}));
+
+vi.mock("@/services/email.service", () => ({
+  enviarInscricaoRecebida: vi.fn(),
 }));
 
 const REDIRECT = new Error("NEXT_REDIRECT_TEST");
@@ -60,24 +67,30 @@ beforeEach(() => {
 });
 
 describe("criarInscricaoEPagarAction", () => {
-  it("evento GATEWAY: cria, inicia pix e redireciona", async () => {
+  it("evento GATEWAY: cria, NÃO inicia pix, envia email recebida e redireciona", async () => {
     vi.mocked(buscarEventoPorId).mockResolvedValue(eventoGateway);
-    vi.mocked(criarInscricao).mockResolvedValue({ id: "insc1" } as never);
-    vi.mocked(iniciarPagamento).mockResolvedValue({} as never);
+    vi.mocked(criarInscricao).mockResolvedValue({
+      id: "insc1",
+      nome: "Maria da Silva",
+      email: "maria@example.com",
+    } as never);
 
     await expect(
       criarInscricaoEPagarAction(undefined, formDataDe(nucleo)),
     ).rejects.toBe(REDIRECT);
 
-    expect(iniciarPagamento).toHaveBeenCalledWith({
-      inscricaoId: "insc1",
-      metodo: "pix",
-    });
+    expect(enviarInscricaoRecebida).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "maria@example.com" }),
+    );
   });
 
-  it("evento MANUAL: cria como pendente, NÃO inicia pix, redireciona", async () => {
+  it("evento MANUAL: cria como pendente e redireciona", async () => {
     vi.mocked(buscarEventoPorId).mockResolvedValue(eventoManual);
-    vi.mocked(criarInscricao).mockResolvedValue({ id: "insc2" } as never);
+    vi.mocked(criarInscricao).mockResolvedValue({
+      id: "insc2",
+      nome: "Maria da Silva",
+      email: "maria@example.com",
+    } as never);
 
     await expect(
       criarInscricaoEPagarAction(
@@ -91,7 +104,6 @@ describe("criarInscricaoEPagarAction", () => {
         camposExtras: expect.objectContaining({ cidade: "Goiânia" }),
       }),
     );
-    expect(iniciarPagamento).not.toHaveBeenCalled();
   });
 
   it("campo dinâmico obrigatório faltando: erro sem tocar services", async () => {

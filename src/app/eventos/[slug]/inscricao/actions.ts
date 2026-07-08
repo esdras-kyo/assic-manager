@@ -16,7 +16,11 @@ import {
   EventoNaoAbertoError,
   SemVagasError,
 } from "@/services/inscricao.service";
-import { iniciarPagamento } from "@/services/pagamento.service";
+import {
+  criarTokenConsulta,
+  montarLinkConsulta,
+} from "@/services/consulta.service";
+import { enviarInscricaoRecebida } from "@/services/email.service";
 
 export interface InscricaoFormState {
   erros?: Record<string, string[]>;
@@ -89,9 +93,19 @@ export async function criarInscricaoEPagarAction(
     });
     inscricaoId = inscricao.id;
 
-    // Ramo de pagamento: só GATEWAY gera Pix automático.
-    if (evento.modalidadePagamento === "GATEWAY") {
-      await iniciarPagamento({ inscricaoId, metodo: "pix" });
+    // Email "inscrição recebida" com link de consulta (best-effort — não
+    // derruba a inscrição se o envio falhar). NÃO gera Pix aqui: a escolha
+    // "pagar agora / pagar depois" acontece em /pagamento/[id].
+    try {
+      const token = await criarTokenConsulta(inscricao.email);
+      await enviarInscricaoRecebida({
+        nome: inscricao.nome,
+        email: inscricao.email,
+        eventoNome: evento.nome,
+        link: montarLinkConsulta(token),
+      });
+    } catch (erroEmail) {
+      console.error("Falha ao enviar email de inscrição recebida:", erroEmail);
     }
   } catch (erro) {
     if (erro instanceof SemVagasError) {
